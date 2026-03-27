@@ -18,12 +18,21 @@ from api.emergency import router as emergency_router
 app = FastAPI(
     title="UHR — Unified Health Record",
     description="API para centralização e análise de históricos médicos com Azure AI",
-    version="0.1.0",
+    version="0.5.0",
 )
+
+import os
+
+_allowed_origins = [
+    "http://localhost:3000",
+]
+_prod_url = os.getenv("FRONTEND_URL")
+if _prod_url:
+    _allowed_origins.append(_prod_url)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,4 +47,4 @@ app.include_router(emergency_router, tags=["Emergência"])
 
 @app.get("/health", tags=["Sistema"])
 def health_check():
-    return {"status": "ok", "version": "0.4.0", "phase": 4}
+    return {"status": "ok", "version": "0.5.0", "phase": 5}

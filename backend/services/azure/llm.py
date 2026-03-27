@@ -29,13 +29,12 @@ def chat_stream(
         yield from _mock_stream(messages, sources)
         return
 
-    from anthropic import AnthropicBedrock
     import anthropic
 
-    # Azure AI Foundry usa o cliente padrão com base_url personalizada
     client = anthropic.Anthropic(
         base_url=os.environ["ANTHROPIC_BASE_URL"],
         api_key=os.environ["ANTHROPIC_API_KEY"],
+        default_headers={"api-key": os.environ["ANTHROPIC_API_KEY"]},
     )
 
     with client.messages.stream(

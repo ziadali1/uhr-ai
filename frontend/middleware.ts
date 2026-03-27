@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -7,27 +7,26 @@ const PUBLIC_PATHS = ["/login", "/emergency"];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Rotas públicas: login e emergência (qualquer /emergency/...)
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 
-  // Verifica sessão pelo cookie do Supabase
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const response = NextResponse.next({ request });
 
-  const response = NextResponse.next();
-  const supabase = createServerClient(supabaseUrl, supabaseKey, {
-    cookies: {
-      get: (name) => request.cookies.get(name)?.value,
-      set: (name, value, options) => {
-        response.cookies.set({ name, value, ...options });
-      },
-      remove: (name, options) => {
-        response.cookies.set({ name, value: "", ...options });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
+        },
       },
     },
-  });
+  );
 
   const { data: { session } } = await supabase.auth.getSession();
 

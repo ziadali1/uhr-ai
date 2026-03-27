@@ -1,10 +1,11 @@
 """
-Azure AI Search — indexação vetorial e busca RAG por usuário.
+Azure AI Search — indexação e busca RAG por usuário.
 
 Estratégia de isolamento: índice único com campo user_id em todos os documentos.
 Toda query inclui filter=user_id eq '{user_id}' — dados de usuários nunca se cruzam.
 
-Com USE_MOCK_AZURE=true, usa busca por palavras-chave em memória.
+Modo produção: busca por keyword (full-text) — sem embeddings, sem custo adicional.
+Modo mock: busca em memória.
 """
 import os
 from dataclasses import dataclass, field
@@ -62,24 +63,19 @@ def index_document(
         return
 
     from azure.search.documents import SearchClient
-    from azure.search.documents.models import VectorizedQuery
     from azure.core.credentials import AzureKeyCredential
 
     endpoint = os.environ["SEARCH_ENDPOINT"]
     key = os.environ["SEARCH_KEY"]
-    index_name = os.environ["SEARCH_INDEX_NAME"]
+    index_name = os.environ.get("SEARCH_INDEX_NAME", "uhr-health-records")
 
     client = SearchClient(endpoint, index_name, AzureKeyCredential(key))
-
-    embedding = _generate_embedding(text)
-
     client.upload_documents(documents=[{
         "id": doc_id,
         "user_id": user_id,
         "content": text,
         "source_name": source_name,
         "entities": ", ".join(entities),
-        "content_vector": embedding,
     }])
 
 
@@ -92,25 +88,16 @@ def search(query: str, user_id: str, top_k: int = 3) -> list[SearchResult]:
         return _mock_search(query, user_id, top_k)
 
     from azure.search.documents import SearchClient
-    from azure.search.documents.models import VectorizedQuery
     from azure.core.credentials import AzureKeyCredential
 
     endpoint = os.environ["SEARCH_ENDPOINT"]
     key = os.environ["SEARCH_KEY"]
-    index_name = os.environ["SEARCH_INDEX_NAME"]
+    index_name = os.environ.get("SEARCH_INDEX_NAME", "uhr-health-records")
 
     client = SearchClient(endpoint, index_name, AzureKeyCredential(key))
 
-    embedding = _generate_embedding(query)
-    vector_query = VectorizedQuery(
-        vector=embedding,
-        k_nearest_neighbors=top_k,
-        fields="content_vector",
-    )
-
     results = client.search(
         search_text=query,
-        vector_queries=[vector_query],
         filter=f"user_id eq '{user_id}'",
         top=top_k,
         select=["id", "content", "source_name"],
@@ -172,7 +159,3 @@ def _extract_excerpt(text: str, query_words: set[str], max_len: int = 400) -> st
     return text[best_pos: best_pos + max_len].strip()
 
 
-def _generate_embedding(text: str) -> list[float]:
-    """Placeholder: geração de embedding via Azure OpenAI (implementar na Fase 5)."""
-    # Em produção: usar azure.ai.inference ou openai para gerar embedding real
-    raise NotImplementedError("Embedding real será configurado com as credenciais Azure")
