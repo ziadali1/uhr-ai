@@ -1,32 +1,47 @@
 """
-Autenticação — Fase 1-4: mock user local
-Fase 5: substituir por validação JWT real do Supabase
+Autenticação — Fase 5: validação real do JWT Supabase.
+
+Com USE_MOCK_AZURE=true → retorna MOCK_USER_ID (desenvolvimento local).
+Com USE_MOCK_AZURE=false → valida o JWT Bearer enviado pelo frontend.
 """
 import os
+import jwt
 from fastapi import Header, HTTPException
 
 
 def get_current_user(authorization: str = Header(default="")) -> str:
-    """
-    Retorna o user_id do usuário autenticado.
-
-    Durante o desenvolvimento (USE_MOCK_AZURE=true), retorna o MOCK_USER_ID
-    definido no .env, sem validar nenhum token.
-
-    Na Fase 5, esta função validará o JWT do Supabase e retornará o user_id real.
-    """
     if os.getenv("USE_MOCK_AZURE", "true").lower() == "true":
         return os.getenv("MOCK_USER_ID", "local-dev-user-001")
 
-    # TODO Fase 5: validar JWT Supabase
     if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Token não fornecido")
+        raise HTTPException(status_code=401, detail="Token não fornecido.")
 
     token = authorization.removeprefix("Bearer ")
-    user_id = _validate_supabase_jwt(token)
-    return user_id
+    return _validate_supabase_jwt(token)
 
 
 def _validate_supabase_jwt(token: str) -> str:
-    """Placeholder para validação real do JWT Supabase (Fase 5)."""
-    raise NotImplementedError("Autenticação real será implementada na Fase 5")
+    """
+    Valida o JWT emitido pelo Supabase e retorna o user_id (sub).
+    O JWT_SECRET está em: Supabase Dashboard → Settings → API → JWT Secret.
+    """
+    secret = os.environ.get("SUPABASE_JWT_SECRET")
+    if not secret:
+        raise HTTPException(
+            status_code=500,
+            detail="SUPABASE_JWT_SECRET não configurado no servidor.",
+        )
+
+    try:
+        payload = jwt.decode(
+            token,
+            secret,
+            algorithms=["HS256"],
+            audience="authenticated",
+        )
+        user_id: str = payload["sub"]
+        return user_id
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expirado.")
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=f"Token inválido: {e}")

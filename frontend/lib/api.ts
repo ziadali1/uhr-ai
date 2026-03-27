@@ -1,4 +1,11 @@
+import { getAccessToken } from "./supabase";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+async function authHeaders(): Promise<HeadersInit> {
+  const token = await getAccessToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export async function uploadDocument(file: File): Promise<{
   document_id: string;
@@ -11,6 +18,7 @@ export async function uploadDocument(file: File): Promise<{
 
   const res = await fetch(`${API_BASE}/upload`, {
     method: "POST",
+    headers: await authHeaders(),
     body: formData,
   });
 
@@ -31,7 +39,7 @@ export async function listDocuments(): Promise<{
   }>;
   total: number;
 }> {
-  const res = await fetch(`${API_BASE}/documents`);
+  const res = await fetch(`${API_BASE}/documents`, { headers: await authHeaders() });
   if (!res.ok) throw new Error("Erro ao listar documentos");
   return res.json();
 }
@@ -53,7 +61,7 @@ export interface DocumentDetail {
 }
 
 export async function getDocument(docId: string): Promise<DocumentDetail> {
-  const res = await fetch(`${API_BASE}/documents/${docId}`);
+  const res = await fetch(`${API_BASE}/documents/${docId}`, { headers: await authHeaders() });
   if (!res.ok) throw new Error("Documento não encontrado");
   return res.json();
 }
@@ -78,7 +86,7 @@ export async function chatStream(
 ): Promise<void> {
   const res = await fetch(`${API_BASE}/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...await authHeaders() },
     body: JSON.stringify({ message, history }),
   });
 
@@ -126,7 +134,7 @@ export interface AnalysisResult {
 }
 
 export async function getAnalysis(): Promise<AnalysisResult> {
-  const res = await fetch(`${API_BASE}/analysis`);
+  const res = await fetch(`${API_BASE}/analysis`, { headers: await authHeaders() });
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.detail || "Erro ao carregar análise");

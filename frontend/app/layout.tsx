@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Activity, Upload, MessageSquare, LayoutDashboard } from "lucide-react";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,11 +18,7 @@ const navItems = [
   { href: "/chat", label: "Agente IA", icon: MessageSquare },
 ];
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body className={`${inter.className} min-h-screen bg-gray-50`}>
@@ -42,6 +39,7 @@ export default function RootLayout({
                   {label}
                 </Link>
               ))}
+              <LogoutButton />
             </nav>
           </div>
         </header>
