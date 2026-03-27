@@ -3,6 +3,13 @@ from typing import Literal
 from pydantic import BaseModel
 
 
+class ExtractedEntity(BaseModel):
+    text: str
+    category: str          # Medication, Diagnosis, Symptom, etc.
+    normalized_text: str | None = None
+    confidence: float
+
+
 class DocumentMetadata(BaseModel):
     id: str
     user_id: str
@@ -34,10 +41,3 @@ class DocumentDetail(BaseModel):
     anonymized_text: str
     medical_entities: list[ExtractedEntity]
     pii_substitutions: list[str]
-
-
-class ExtractedEntity(BaseModel):
-    text: str
-    category: str          # Medication, Diagnosis, Symptom, etc.
-    normalized_text: str | None = None
-    confidence: float
