@@ -8,6 +8,7 @@ from datetime import datetime
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A5
 from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas as rl_canvas
 
 from models.emergency import EmergencyProfile
@@ -137,7 +138,7 @@ def _draw_qr_and_footer(
     qr_x = w - qr_size - 10 * mm
     qr_y = 14 * mm
 
-    qr_buf = io.BytesIO(qr_png_bytes)
+    qr_buf = ImageReader(io.BytesIO(qr_png_bytes))
     c.drawImage(qr_buf, qr_x, qr_y, width=qr_size, height=qr_size)
 
     c.setFillColor(GRAY)
