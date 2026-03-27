@@ -1,34 +1,26 @@
 import Link from "next/link";
 import { Upload, MessageSquare, QrCode, Brain } from "lucide-react";
+import { PatientSummary } from "@/components/dashboard/PatientSummary";
 
-const pillars = [
+const quickLinks = [
   {
     icon: Upload,
     title: "Documentos",
-    description: "Faça upload de laudos, receitas e exames. OCR + anonimização automáticos.",
+    description: "Enviar laudos, receitas e exames.",
     href: "/upload",
     color: "text-blue-600 bg-blue-50",
   },
   {
-    icon: Brain,
-    title: "Análise IA",
-    description: "Extração de diagnósticos, medicamentos, alergias e padrões do histórico.",
-    href: "/dashboard",
-    color: "text-purple-600 bg-purple-50",
-    disabled: true,
-    badge: "Fase 3",
-  },
-  {
     icon: MessageSquare,
     title: "Agente IA",
-    description: "Tire dúvidas sobre seu histórico em linguagem natural, com citação de fontes.",
+    description: "Perguntas sobre o histórico.",
     href: "/chat",
     color: "text-green-600 bg-green-50",
   },
   {
     icon: QrCode,
     title: "Emergência",
-    description: "Relatório crítico com alergias, medicamentos e condições ativas via QR Code.",
+    description: "Relatório crítico via QR Code.",
     href: "/emergency/local-dev-user-001",
     color: "text-red-600 bg-red-50",
     disabled: true,
@@ -39,43 +31,47 @@ const pillars = [
 export default function DashboardPage() {
   return (
     <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Painel</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Histórico médico centralizado e analisado por IA.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {quickLinks.map(({ icon: Icon, title, href, color, disabled, badge }) => (
+            <Link
+              key={title}
+              href={disabled ? "#" : href}
+              aria-disabled={disabled}
+              title={title}
+              className={`relative flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition-all hover:shadow-sm ${
+                disabled ? "opacity-50 pointer-events-none" : "hover:border-blue-300"
+              }`}
+            >
+              <div className={`rounded p-1 ${color}`}>
+                <Icon className="h-3.5 w-3.5" />
+              </div>
+              {title}
+              {badge && (
+                <span className="ml-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-400">
+                  {badge}
+                </span>
+              )}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Análise do histórico */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Painel</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Seu histórico médico centralizado e analisado por IA.
-        </p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        {pillars.map(({ icon: Icon, title, description, href, color, disabled, badge }) => (
-          <Link
-            key={title}
-            href={disabled ? "#" : href}
-            aria-disabled={disabled}
-            className={`group relative rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md ${
-              disabled ? "opacity-60 pointer-events-none" : "hover:border-blue-300"
-            }`}
-          >
-            {badge && (
-              <span className="absolute right-4 top-4 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
-                {badge}
-              </span>
-            )}
-            <div className={`mb-4 inline-flex rounded-lg p-2.5 ${color}`}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <h2 className="font-semibold text-gray-900">{title}</h2>
-            <p className="mt-1 text-sm text-gray-500">{description}</p>
-          </Link>
-        ))}
-      </div>
-
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-        <p className="text-xs text-amber-800">
-          <strong>Aviso legal:</strong> As sugestões geradas pela IA não constituem diagnóstico
-          médico. Toda informação deve ser validada por um profissional de saúde habilitado.
-          Este projeto é estritamente educacional e de portfólio.
-        </p>
+        <div className="mb-4 flex items-center gap-2">
+          <div className="rounded-lg bg-purple-50 p-1.5 text-purple-600">
+            <Brain className="h-4 w-4" />
+          </div>
+          <h2 className="text-base font-semibold text-gray-800">Análise do Histórico</h2>
+        </div>
+        <PatientSummary />
       </div>
     </div>
   );

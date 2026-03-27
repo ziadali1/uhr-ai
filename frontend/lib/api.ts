@@ -108,3 +108,28 @@ export async function chatStream(
     }
   }
 }
+
+export interface SuggestedSpecialty {
+  specialty: string;
+  reason: string;
+}
+
+export interface AnalysisResult {
+  user_id: string;
+  case_summary: string;
+  diagnoses: string[];
+  active_medications: string[];
+  allergies: string[];
+  suggested_specialties: SuggestedSpecialty[];
+  document_count: number;
+  disclaimer: string;
+}
+
+export async function getAnalysis(): Promise<AnalysisResult> {
+  const res = await fetch(`${API_BASE}/analysis`);
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Erro ao carregar análise");
+  }
+  return res.json();
+}
