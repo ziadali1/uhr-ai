@@ -53,10 +53,10 @@ export default function DashboardPage() {
           <Link
             key={title}
             href={disabled ? "#" : href}
+            aria-disabled={disabled}
             className={`group relative rounded-xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md ${
-              disabled ? "opacity-60 cursor-not-allowed" : "hover:border-blue-300"
+              disabled ? "opacity-60 pointer-events-none" : "hover:border-blue-300"
             }`}
-            onClick={disabled ? (e) => e.preventDefault() : undefined}
           >
             {badge && (
               <span className="absolute right-4 top-4 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
