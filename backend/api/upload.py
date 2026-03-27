@@ -4,7 +4,8 @@ POST /upload — recebe documento médico e executa o pipeline completo:
   2. Extração de entidades (Text Analytics for Health)
   3. Anonimização (pipeline)
   4. Upload no Blob Storage (versão anonimizada)
-  5. Retorna metadados do documento processado
+  5. Indexação no Azure AI Search (RAG)
+  6. Retorna metadados do documento processado
 """
 import uuid
 from datetime import datetime, timezone
@@ -17,6 +18,7 @@ from services.azure.blob_storage import upload_blob
 from services.azure.document_intelligence import extract_text
 from services.azure.text_analytics import PII_CATEGORIES, extract_health_entities
 from services.document_store import save as store_save
+from services.rag.indexer import index_after_upload
 from utils.auth import get_current_user
 
 router = APIRouter()
@@ -72,6 +74,15 @@ async def upload_document(
     )
 
     medical_entities = [e for e in entities if e.category not in PII_CATEGORIES]
+
+    # 5. Indexação no Azure AI Search para RAG
+    index_after_upload(
+        doc_id=doc_id,
+        user_id=user_id,
+        anonymized_text=anonymized_text,
+        source_name=file.filename or "document",
+        entities=medical_entities,
+    )
 
     # Persiste no store em memória (Fase 5: Supabase)
     store_save(DocumentDetail(

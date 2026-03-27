@@ -24,8 +24,6 @@ const pillars = [
     description: "Tire dúvidas sobre seu histórico em linguagem natural, com citação de fontes.",
     href: "/chat",
     color: "text-green-600 bg-green-50",
-    disabled: true,
-    badge: "Fase 2",
   },
   {
     icon: QrCode,

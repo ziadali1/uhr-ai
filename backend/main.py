@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.upload import router as upload_router
 from api.documents import router as documents_router
+from api.chat import router as chat_router
 
 app = FastAPI(
     title="UHR — Unified Health Record",
@@ -28,8 +29,9 @@ app.add_middleware(
 
 app.include_router(upload_router, tags=["Documentos"])
 app.include_router(documents_router, tags=["Documentos"])
+app.include_router(chat_router, tags=["Agente IA"])
 
 
 @app.get("/health", tags=["Sistema"])
 def health_check():
-    return {"status": "ok", "version": "0.1.0", "phase": 1}
+    return {"status": "ok", "version": "0.2.0", "phase": 2}
