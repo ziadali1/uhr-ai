@@ -26,6 +26,16 @@ class UploadResponse(BaseModel):
     blob_url: str
 
 
+class DocumentDetail(BaseModel):
+    document_id: str
+    user_id: str
+    original_name: str
+    upload_date: datetime
+    anonymized_text: str
+    medical_entities: list[ExtractedEntity]
+    pii_substitutions: list[str]
+
+
 class ExtractedEntity(BaseModel):
     text: str
     category: str          # Medication, Diagnosis, Symptom, etc.

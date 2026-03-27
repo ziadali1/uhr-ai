@@ -1,7 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { UploadZone } from "@/components/upload/UploadZone";
 import { DocumentList } from "@/components/upload/DocumentList";
 
 export default function UploadPage() {
+  const [refreshKey, setRefreshKey] = useState(0);
+
   return (
     <div className="space-y-8">
       <div>
@@ -11,11 +16,11 @@ export default function UploadPage() {
         </p>
       </div>
 
-      <UploadZone />
+      <UploadZone onSuccess={() => setRefreshKey((k) => k + 1)} />
 
       <div>
         <h2 className="mb-4 text-base font-semibold text-gray-800">Documentos enviados</h2>
-        <DocumentList />
+        <DocumentList refreshKey={refreshKey} />
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ interface UploadResult {
   entity_count: number;
 }
 
-export function UploadZone() {
+export function UploadZone({ onSuccess }: { onSuccess?: () => void }) {
   const [status, setStatus] = useState<UploadStatus>("idle");
   const [isDragging, setIsDragging] = useState(false);
   const [result, setResult] = useState<UploadResult | null>(null);
@@ -28,11 +28,12 @@ export function UploadZone() {
       const data = await uploadDocument(file);
       setResult(data);
       setStatus("success");
+      onSuccess?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido");
       setStatus("error");
     }
-  }, []);
+  }, [onSuccess]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {

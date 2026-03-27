@@ -35,3 +35,25 @@ export async function listDocuments(): Promise<{
   if (!res.ok) throw new Error("Erro ao listar documentos");
   return res.json();
 }
+
+export interface Entity {
+  text: string;
+  category: string;
+  normalized_text: string | null;
+  confidence: number;
+}
+
+export interface DocumentDetail {
+  document_id: string;
+  original_name: string;
+  upload_date: string;
+  anonymized_text: string;
+  medical_entities: Entity[];
+  pii_substitutions: string[];
+}
+
+export async function getDocument(docId: string): Promise<DocumentDetail> {
+  const res = await fetch(`${API_BASE}/documents/${docId}`);
+  if (!res.ok) throw new Error("Documento não encontrado");
+  return res.json();
+}

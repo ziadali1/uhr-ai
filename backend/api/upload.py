@@ -11,11 +11,12 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
-from models.document import UploadResponse
+from models.document import DocumentDetail, UploadResponse
 from services.anonymizer.pipeline import run_pipeline
 from services.azure.blob_storage import upload_blob
 from services.azure.document_intelligence import extract_text
-from services.azure.text_analytics import extract_health_entities
+from services.azure.text_analytics import PII_CATEGORIES, extract_health_entities
+from services.document_store import save as store_save
 from utils.auth import get_current_user
 
 router = APIRouter()
@@ -70,15 +71,22 @@ async def upload_document(
         user_id=user_id,
     )
 
-    # Conta apenas entidades médicas (não PII)
-    medical_entity_count = sum(
-        1 for e in entities
-        if e.category not in {"PersonName", "PersonId", "MedicalRegistration", "Address", "PhoneNumber"}
-    )
+    medical_entities = [e for e in entities if e.category not in PII_CATEGORIES]
+
+    # Persiste no store em memória (Fase 5: Supabase)
+    store_save(DocumentDetail(
+        document_id=doc_id,
+        user_id=user_id,
+        original_name=file.filename or "document",
+        upload_date=datetime.now(timezone.utc),
+        anonymized_text=anonymized_text,
+        medical_entities=medical_entities,
+        pii_substitutions=substitutions,
+    ))
 
     return UploadResponse(
         document_id=doc_id,
         message=f"Documento processado com sucesso. {len(substitutions)} substituições de PII realizadas.",
-        entity_count=medical_entity_count,
+        entity_count=len(medical_entities),
         blob_url=blob_url,
     )
