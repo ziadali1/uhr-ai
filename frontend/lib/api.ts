@@ -133,3 +133,40 @@ export async function getAnalysis(): Promise<AnalysisResult> {
   }
   return res.json();
 }
+
+export interface EmergencyAllergy {
+  name: string;
+  severity: string;
+}
+
+export interface EmergencyMedication {
+  name: string;
+  dose: string;
+  alert: string | null;
+}
+
+export interface EmergencyProfile {
+  user_id: string;
+  blood_type: string | null;
+  allergies: EmergencyAllergy[];
+  active_medications: EmergencyMedication[];
+  active_conditions: string[];
+  last_updated: string;
+}
+
+export async function getEmergencyProfile(userId: string): Promise<EmergencyProfile> {
+  const res = await fetch(`${API_BASE}/emergency/${userId}`);
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Perfil de emergência não encontrado");
+  }
+  return res.json();
+}
+
+export function emergencyPdfUrl(userId: string): string {
+  return `${API_BASE}/emergency/${userId}/pdf`;
+}
+
+export function emergencyQrUrl(userId: string): string {
+  return `${API_BASE}/emergency/${userId}/qr`;
+}

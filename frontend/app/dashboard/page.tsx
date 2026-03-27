@@ -23,8 +23,6 @@ const quickLinks = [
     description: "Relatório crítico via QR Code.",
     href: "/emergency/local-dev-user-001",
     color: "text-red-600 bg-red-50",
-    disabled: true,
-    badge: "Fase 4",
   },
 ];
 
