@@ -7,7 +7,7 @@ import {
   emergencyQrUrl,
   type EmergencyProfile,
 } from "@/lib/api";
-import { AlertTriangle, Pill, Stethoscope, Printer, Loader2, QrCode } from "lucide-react";
+import { AlertTriangle, Pill, Stethoscope, Printer, Loader2 } from "lucide-react";
 
 const SEVERITY_STYLE: Record<string, string> = {
   severa: "border-red-400 bg-red-50 text-red-800 font-bold",
