@@ -33,7 +33,8 @@ jobs:
           app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }}
           package: backend
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
-          scm-do-build-during-deployment: false
+          sku: flexconsumption
+          #scm-do-build-during-deployment: false
 
   # ──────────────────────────────────────────
   # Deploy Frontend → Azure Static Web Apps
