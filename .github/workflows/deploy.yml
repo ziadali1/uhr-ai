@@ -14,9 +14,20 @@ jobs:
     name: Deploy Backend (Azure Functions)
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
@@ -27,14 +38,14 @@ jobs:
         working-directory: backend
         run: pip install -r requirements.txt --target .python_packages/lib/site-packages
 
+      - name: Optional sanity check
+        run: az account show
+
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }}
           package: backend
-          publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
-          sku: flexconsumption
-          #scm-do-build-during-deployment: false
 
   # ──────────────────────────────────────────
   # Deploy Frontend → Azure Static Web Apps
