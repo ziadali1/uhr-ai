@@ -40,7 +40,7 @@ def get_emergency_profile(user_id: str):
 def get_emergency_qr(user_id: str):
     """Gera e retorna o QR Code PNG apontando para a página de emergência."""
     _get_profile_or_404(user_id)
-    url = f"{APP_URL}/emergency/{user_id}"
+    url = f"{APP_URL}/emergency?userId={user_id}"
     png_bytes = generate_qr_png(url)
     return Response(content=png_bytes, media_type="image/png")
 
@@ -49,7 +49,7 @@ def get_emergency_qr(user_id: str):
 def get_emergency_pdf(user_id: str):
     """Gera e retorna o cartão de emergência em PDF (A5, imprimível)."""
     profile = _get_profile_or_404(user_id)
-    url = f"{APP_URL}/emergency/{user_id}"
+    url = f"{APP_URL}/emergency?userId={user_id}"
     qr_bytes = generate_qr_png(url, box_size=6, border=2)
     pdf_bytes = generate_emergency_pdf(profile, qr_bytes)
     return Response(

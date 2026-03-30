@@ -22,7 +22,7 @@ const quickLinks: { icon: React.ElementType; title: string; description: string;
     icon: QrCode,
     title: "Emergência",
     description: "Relatório crítico via QR Code.",
-    href: "/emergency/local-dev-user-001",
+    href: "/emergency?userId=local-dev-user-001",
     color: "text-red-600 bg-red-50",
   },
 ];

@@ -1,6 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   getEmergencyProfile,
   emergencyPdfUrl,
@@ -15,13 +17,19 @@ const SEVERITY_STYLE: Record<string, string> = {
   leve: "border-yellow-300 bg-yellow-50 text-yellow-800",
 };
 
-export default function EmergencyPage({ params }: { params: { userId: string } }) {
-  const { userId } = params;
+function EmergencyContent() {
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId") ?? "";
   const [profile, setProfile] = useState<EmergencyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!userId) {
+      setError("ID de usuário não informado.");
+      setLoading(false);
+      return;
+    }
     getEmergencyProfile(userId)
       .then(setProfile)
       .catch((e) => setError(e.message))
@@ -165,5 +173,19 @@ export default function EmergencyPage({ params }: { params: { userId: string } }
         </p>
       </div>
     </div>
+  );
+}
+
+export default function EmergencyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-red-50">
+          <Loader2 className="h-8 w-8 animate-spin text-red-500" />
+        </div>
+      }
+    >
+      <EmergencyContent />
+    </Suspense>
   );
 }

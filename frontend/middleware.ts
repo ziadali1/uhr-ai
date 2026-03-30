@@ -1,3 +1,12 @@
+/**
+ * Middleware de autenticação.
+ *
+ * NOTA: Com `output: export` no next.config.mjs o middleware não é executado
+ * em produção (Azure Static Web Apps free tier = somente estático).
+ * A proteção de rotas é feita client-side nos próprios componentes via
+ * supabase.auth.getSession(). Este arquivo é mantido para referência e
+ * para uso futuro caso o projeto migre para SSR (Azure SWA Standard ou Vercel).
+ */
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
