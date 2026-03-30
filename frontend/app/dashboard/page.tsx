@@ -1,8 +1,9 @@
+import React from "react";
 import Link from "next/link";
 import { Upload, MessageSquare, QrCode, Brain } from "lucide-react";
 import { PatientSummary } from "@/components/dashboard/PatientSummary";
 
-const quickLinks = [
+const quickLinks: { icon: React.ElementType; title: string; description: string; href: string; color: string; disabled?: boolean; badge?: string }[] = [
   {
     icon: Upload,
     title: "Documentos",
