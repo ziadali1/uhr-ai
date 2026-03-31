@@ -46,18 +46,17 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
     if _use_mock():
         return _MOCK_TEXT.strip()
 
-    from azure.ai.documentintelligence import DocumentIntelligenceClient
+    from azure.ai.formrecognizer import DocumentAnalysisClient
     from azure.core.credentials import AzureKeyCredential
 
     endpoint = os.environ["DOCUMENT_INTELLIGENCE_ENDPOINT"]
     key = os.environ["DOCUMENT_INTELLIGENCE_KEY"]
 
-    client = DocumentIntelligenceClient(endpoint, AzureKeyCredential(key))
+    client = DocumentAnalysisClient(endpoint, AzureKeyCredential(key))
 
     poller = client.begin_analyze_document(
         "prebuilt-read",
-        analyze_request=BytesIO(file_bytes),
-        content_type="application/octet-stream",
+        document=BytesIO(file_bytes),
     )
     result = poller.result()
 
