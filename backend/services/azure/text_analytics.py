@@ -59,7 +59,7 @@ def extract_health_entities(text: str) -> list[ExtractedEntity]:
         for entity in doc.entities:
             entities.append(ExtractedEntity(
                 text=entity.text,
-                category=entity.category.value,
+                category=str(entity.category),
                 normalized_text=entity.normalized_text,
                 confidence=entity.confidence_score,
             ))
