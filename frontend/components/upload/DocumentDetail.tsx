@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getDocument, type DocumentDetail } from "@/lib/api";
-import { Loader2, ShieldCheck, Pill, Stethoscope, AlertTriangle, X } from "lucide-react";
+import { Loader2, Pill, Stethoscope, AlertTriangle, X } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   Diagnosis: { label: "Diagnóstico", icon: Stethoscope, color: "text-blue-700 bg-blue-50 border-blue-200" },
@@ -85,28 +85,9 @@ export function DocumentDetail({ docId, onClose }: Props) {
                 )}
               </div>
 
-              {/* Substituições de PII */}
+              {/* Texto extraído */}
               <div>
-                <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-gray-700">
-                  <ShieldCheck className="h-4 w-4 text-green-600" />
-                  Dados anonimizados ({detail.pii_substitutions.length})
-                </h3>
-                {detail.pii_substitutions.length === 0 ? (
-                  <p className="text-sm text-gray-400">Nenhuma substituição de PII realizada.</p>
-                ) : (
-                  <ul className="space-y-1">
-                    {detail.pii_substitutions.map((s, i) => (
-                      <li key={i} className="font-mono text-xs text-gray-600 bg-gray-50 rounded px-2 py-1">
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {/* Texto anonimizado */}
-              <div>
-                <h3 className="mb-3 text-sm font-semibold text-gray-700">Texto anonimizado</h3>
+                <h3 className="mb-3 text-sm font-semibold text-gray-700">Texto extraído</h3>
                 <pre className="whitespace-pre-wrap rounded-lg bg-gray-50 border border-gray-200 p-4 text-xs text-gray-700 leading-relaxed">
                   {detail.anonymized_text}
                 </pre>

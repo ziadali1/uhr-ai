@@ -30,8 +30,16 @@ _MOCK_ENTITIES = [
                     normalized_text="Penicillin", confidence=0.98),
 ]
 
-# Categorias de PII para anonimização
-PII_CATEGORIES = {"PersonName", "PersonId", "MedicalRegistration", "Address", "PhoneNumber"}
+# Categorias com relevância clínica real — exclui números, datas, abreviações
+CLINICAL_CATEGORIES = {
+    "Diagnosis", "MedicationName", "Dosage", "AllergyEntity",
+    "SymptomOrSign", "BodyStructure", "TreatmentName",
+    "ExaminationName", "MedicalCondition", "Frequency",
+    "MedicationRoute", "HealthcareProfession", "Age", "Gender",
+}
+
+MIN_CONFIDENCE = 0.75
+MIN_TEXT_LENGTH = 3
 
 
 def extract_health_entities(text: str) -> list[ExtractedEntity]:
@@ -57,9 +65,16 @@ def extract_health_entities(text: str) -> list[ExtractedEntity]:
         if doc.is_error:
             continue
         for entity in doc.entities:
+            category = str(entity.category)
+            if (
+                category not in CLINICAL_CATEGORIES
+                or entity.confidence_score < MIN_CONFIDENCE
+                or len(entity.text.strip()) < MIN_TEXT_LENGTH
+            ):
+                continue
             entities.append(ExtractedEntity(
                 text=entity.text,
-                category=str(entity.category),
+                category=category,
                 normalized_text=entity.normalized_text,
                 confidence=entity.confidence_score,
             ))

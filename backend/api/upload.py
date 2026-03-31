@@ -13,10 +13,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from models.document import DocumentDetail, UploadResponse
-from services.anonymizer.pipeline import run_pipeline
 from services.azure.blob_storage import upload_blob
 from services.azure.document_intelligence import extract_text
-from services.azure.text_analytics import PII_CATEGORIES, extract_health_entities
+from services.azure.text_analytics import extract_health_entities
 from services.document_store import save as store_save
 from services.rag.indexer import index_after_upload
 from utils.auth import get_current_user
@@ -62,45 +61,40 @@ async def upload_document(
         raw_text = extract_text(file_bytes, file.filename or "document")
         logging.warning("UPLOAD: OCR concluído")
 
-        # 2. Extração de entidades
+        # 2. Extração de entidades clínicas
         logging.warning("UPLOAD: iniciando extração de entidades")
         entities = extract_health_entities(raw_text)
         logging.warning("UPLOAD: entidades extraídas")
 
-        # 3. Anonimização
-        anonymized_text, substitutions = run_pipeline(raw_text, entities)
-
-        # 4. Upload do texto anonimizado (não do arquivo original)
+        # 3. Upload do texto completo (sem anonimização — usuário consentiu)
         doc_id = str(uuid.uuid4())
-        anon_filename = f"{doc_id}_anonymized.txt"
+        txt_filename = f"{doc_id}.txt"
         logging.warning("UPLOAD: iniciando blob upload")
         blob_url = upload_blob(
-            file_bytes=anonymized_text.encode("utf-8"),
-            filename=anon_filename,
+            file_bytes=raw_text.encode("utf-8"),
+            filename=txt_filename,
             user_id=user_id,
         )
         logging.warning("UPLOAD: blob upload concluído")
 
-        medical_entities = [e for e in entities if e.category not in PII_CATEGORIES]
-
-        # 5. Indexação no Azure AI Search para RAG
+        # 4. Indexação no Azure AI Search para RAG
         index_after_upload(
             doc_id=doc_id,
             user_id=user_id,
-            anonymized_text=anonymized_text,
+            anonymized_text=raw_text,
             source_name=file.filename or "document",
-            entities=medical_entities,
+            entities=entities,
         )
 
-        # 6. Persistência no Supabase
+        # 5. Persistência no Supabase
         store_save(DocumentDetail(
             document_id=doc_id,
             user_id=user_id,
             original_name=file.filename or "document",
             upload_date=datetime.now(timezone.utc),
-            anonymized_text=anonymized_text,
-            medical_entities=medical_entities,
-            pii_substitutions=substitutions,
+            anonymized_text=raw_text,
+            medical_entities=entities,
+            pii_substitutions=[],
         ))
 
     except HTTPException:

@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [consented, setConsented] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -31,6 +32,11 @@ export default function LoginPage() {
         router.refresh();
       }
     } else {
+      if (!consented) {
+        setError("Você precisa aceitar os termos para criar uma conta.");
+        setLoading(false);
+        return;
+      }
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) {
         setError(error.message);
@@ -100,6 +106,22 @@ export default function LoginPage() {
               <p className="rounded-lg bg-green-50 px-3 py-2 text-xs text-green-700 border border-green-200">
                 {success}
               </p>
+            )}
+
+            {mode === "register" && (
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consented}
+                  onChange={(e) => setConsented(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-blue-600"
+                />
+                <span className="text-xs text-gray-600">
+                  Concordo que meus documentos médicos serão armazenados e processados
+                  pela plataforma UHR para fins de centralização e análise do meu
+                  histórico de saúde. Somente eu terei acesso aos meus dados.
+                </span>
+              </label>
             )}
 
             <button
