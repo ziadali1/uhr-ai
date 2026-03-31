@@ -57,10 +57,15 @@ async def upload_document(
 
     try:
         # 1. OCR
+        import logging
+        logging.warning("UPLOAD: iniciando OCR")
         raw_text = extract_text(file_bytes, file.filename or "document")
+        logging.warning("UPLOAD: OCR concluído")
 
         # 2. Extração de entidades
+        logging.warning("UPLOAD: iniciando extração de entidades")
         entities = extract_health_entities(raw_text)
+        logging.warning("UPLOAD: entidades extraídas")
 
         # 3. Anonimização
         anonymized_text, substitutions = run_pipeline(raw_text, entities)
@@ -68,11 +73,13 @@ async def upload_document(
         # 4. Upload do texto anonimizado (não do arquivo original)
         doc_id = str(uuid.uuid4())
         anon_filename = f"{doc_id}_anonymized.txt"
+        logging.warning("UPLOAD: iniciando blob upload")
         blob_url = upload_blob(
             file_bytes=anonymized_text.encode("utf-8"),
             filename=anon_filename,
             user_id=user_id,
         )
+        logging.warning("UPLOAD: blob upload concluído")
 
         medical_entities = [e for e in entities if e.category not in PII_CATEGORIES]
 
