@@ -2,11 +2,11 @@
 Autenticação — Fase 5: validação real do JWT Supabase.
 
 Com USE_MOCK_AZURE=true → retorna MOCK_USER_ID (desenvolvimento local).
-Com USE_MOCK_AZURE=false → valida o JWT Bearer enviado pelo frontend.
+Com USE_MOCK_AZURE=false → valida o JWT Bearer via cliente Supabase.
 """
 import os
-import jwt
 from fastapi import Header, HTTPException
+from supabase import create_client
 
 
 def get_current_user(authorization: str = Header(default="")) -> str:
@@ -22,26 +22,25 @@ def get_current_user(authorization: str = Header(default="")) -> str:
 
 def _validate_supabase_jwt(token: str) -> str:
     """
-    Valida o JWT emitido pelo Supabase e retorna o user_id (sub).
-    O JWT_SECRET está em: Supabase Dashboard → Settings → API → JWT Secret.
+    Valida o JWT via Supabase client (get_user), evitando problemas
+    de algoritmo/versão do PyJWT. Retorna o user_id (sub).
     """
-    secret = os.environ.get("SUPABASE_JWT_SECRET")
-    if not secret:
+    url = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+
+    if not url or not key:
         raise HTTPException(
             status_code=500,
-            detail="SUPABASE_JWT_SECRET não configurado no servidor.",
+            detail="SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configurados.",
         )
 
     try:
-        payload = jwt.decode(
-            token,
-            secret,
-            algorithms=["HS256"],
-            audience="authenticated",
-        )
-        user_id: str = payload["sub"]
-        return user_id
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expirado.")
-    except jwt.InvalidTokenError as e:
-        raise HTTPException(status_code=401, detail=f"Token inválido: {e}")
+        supabase = create_client(url, key)
+        response = supabase.auth.get_user(token)
+        if not response.user:
+            raise HTTPException(status_code=401, detail="Token inválido.")
+        return response.user.id
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Erro ao validar token: {e}")
