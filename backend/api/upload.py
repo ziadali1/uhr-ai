@@ -104,7 +104,7 @@ async def upload_document(
 
     return UploadResponse(
         document_id=doc_id,
-        message=f"Documento processado com sucesso. {len(substitutions)} substituições de PII realizadas.",
-        entity_count=len(medical_entities),
+        message=f"Documento processado com sucesso. {len(entities)} entidades clínicas identificadas.",
+        entity_count=len(entities),
         blob_url=blob_url,
     )

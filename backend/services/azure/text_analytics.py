@@ -38,8 +38,18 @@ CLINICAL_CATEGORIES = {
     "MedicationRoute", "HealthcareProfession", "Age", "Gender",
 }
 
-MIN_CONFIDENCE = 0.75
-MIN_TEXT_LENGTH = 3
+MIN_CONFIDENCE = 0.80
+MIN_TEXT_LENGTH = 5
+
+# Termos de cabeçalho/contexto laboratorial que não são entidades clínicas
+_BLOCKLIST = {
+    "cpf", "crm", "crf", "cnes", "rg", "cnpj",
+    "homens", "mulheres", "grávidas", "adultos", "crianças",
+    "soro", "plasma", "sangue total", "edta",
+    "conveni", "sanitária", "sani tária",
+    "dia", "data", "req", "paginas", "página",
+    "laboratorio", "laboratório", "unidade", "matriz", "registro",
+}
 
 
 def extract_health_entities(text: str) -> list[ExtractedEntity]:
@@ -66,10 +76,12 @@ def extract_health_entities(text: str) -> list[ExtractedEntity]:
             continue
         for entity in doc.entities:
             category = str(entity.category)
+            text_clean = entity.text.strip()
             if (
                 category not in CLINICAL_CATEGORIES
                 or entity.confidence_score < MIN_CONFIDENCE
-                or len(entity.text.strip()) < MIN_TEXT_LENGTH
+                or len(text_clean) < MIN_TEXT_LENGTH
+                or text_clean.lower() in _BLOCKLIST
             ):
                 continue
             entities.append(ExtractedEntity(
