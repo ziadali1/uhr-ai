@@ -55,45 +55,51 @@ async def upload_document(
             detail=f"Arquivo muito grande. Máximo: {MAX_FILE_SIZE_MB}MB.",
         )
 
-    # 1. OCR
-    raw_text = extract_text(file_bytes, file.filename or "document")
+    try:
+        # 1. OCR
+        raw_text = extract_text(file_bytes, file.filename or "document")
 
-    # 2. Extração de entidades
-    entities = extract_health_entities(raw_text)
+        # 2. Extração de entidades
+        entities = extract_health_entities(raw_text)
 
-    # 3. Anonimização
-    anonymized_text, substitutions = run_pipeline(raw_text, entities)
+        # 3. Anonimização
+        anonymized_text, substitutions = run_pipeline(raw_text, entities)
 
-    # 4. Upload do texto anonimizado (não do arquivo original)
-    doc_id = str(uuid.uuid4())
-    anon_filename = f"{doc_id}_anonymized.txt"
-    blob_url = upload_blob(
-        file_bytes=anonymized_text.encode("utf-8"),
-        filename=anon_filename,
-        user_id=user_id,
-    )
+        # 4. Upload do texto anonimizado (não do arquivo original)
+        doc_id = str(uuid.uuid4())
+        anon_filename = f"{doc_id}_anonymized.txt"
+        blob_url = upload_blob(
+            file_bytes=anonymized_text.encode("utf-8"),
+            filename=anon_filename,
+            user_id=user_id,
+        )
 
-    medical_entities = [e for e in entities if e.category not in PII_CATEGORIES]
+        medical_entities = [e for e in entities if e.category not in PII_CATEGORIES]
 
-    # 5. Indexação no Azure AI Search para RAG
-    index_after_upload(
-        doc_id=doc_id,
-        user_id=user_id,
-        anonymized_text=anonymized_text,
-        source_name=file.filename or "document",
-        entities=medical_entities,
-    )
+        # 5. Indexação no Azure AI Search para RAG
+        index_after_upload(
+            doc_id=doc_id,
+            user_id=user_id,
+            anonymized_text=anonymized_text,
+            source_name=file.filename or "document",
+            entities=medical_entities,
+        )
 
-    # Persiste no store em memória (Fase 5: Supabase)
-    store_save(DocumentDetail(
-        document_id=doc_id,
-        user_id=user_id,
-        original_name=file.filename or "document",
-        upload_date=datetime.now(timezone.utc),
-        anonymized_text=anonymized_text,
-        medical_entities=medical_entities,
-        pii_substitutions=substitutions,
-    ))
+        # 6. Persistência no Supabase
+        store_save(DocumentDetail(
+            document_id=doc_id,
+            user_id=user_id,
+            original_name=file.filename or "document",
+            upload_date=datetime.now(timezone.utc),
+            anonymized_text=anonymized_text,
+            medical_entities=medical_entities,
+            pii_substitutions=substitutions,
+        ))
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao processar documento: {e}")
 
     return UploadResponse(
         document_id=doc_id,

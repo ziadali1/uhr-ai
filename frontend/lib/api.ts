@@ -7,6 +7,15 @@ async function authHeaders(): Promise<HeadersInit> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+async function parseError(res: Response): Promise<string> {
+  try {
+    const err = await res.json();
+    return err.detail || `Erro ${res.status}`;
+  } catch {
+    return `Erro ${res.status}`;
+  }
+}
+
 export async function uploadDocument(file: File): Promise<{
   document_id: string;
   message: string;
@@ -22,11 +31,7 @@ export async function uploadDocument(file: File): Promise<{
     body: formData,
   });
 
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.detail || "Erro ao fazer upload");
-  }
-
+  if (!res.ok) throw new Error(await parseError(res));
   return res.json();
 }
 
