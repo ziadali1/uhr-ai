@@ -57,7 +57,7 @@ export function ChatInterface() {
       onError: (err) => {
         setMessages((prev) => {
           const updated = [...prev];
-          updated[updated.length - 1] = { ...updated[updated.length - 1], content: `Erro: ${err}` };
+          updated[updated.length - 1] = { ...updated[updated.length - 1], content: err };
           return updated;
         });
         setIsStreaming(false);
