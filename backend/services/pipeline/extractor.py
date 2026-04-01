@@ -13,6 +13,7 @@ Families:
 """
 
 import json
+import logging
 import re
 
 
@@ -244,5 +245,11 @@ def extract_structured(clinical_text: str, document_family: str) -> dict:
     try:
         raw = generate_json(system=_SYSTEM_BASE, user=full_prompt)
         return _parse_json_response(raw)
-    except Exception:
+    except Exception as e:
+        logging.error(
+            "extract_structured failed for family=%s: %s: %s",
+            document_family,
+            type(e).__name__,
+            e,
+        )
         return {}

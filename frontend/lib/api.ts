@@ -244,6 +244,7 @@ export async function chatStream(
         const event = JSON.parse(line.slice(6));
         if (event.type === "sources") callbacks.onSources(event.sources);
         else if (event.type === "token") callbacks.onToken(event.content);
+        else if (event.type === "error") callbacks.onError(event.content);
         else if (event.type === "done") callbacks.onDone();
       } catch {
         // linha incompleta, ignora
