@@ -56,6 +56,82 @@ export interface Entity {
   confidence: number;
 }
 
+export interface LabFinding {
+  name: string;
+  value: string;
+  unit: string | null;
+  reference_range: string | null;
+  flag: "normal" | "high" | "low" | "borderline" | "critical" | null;
+  is_clinically_actionable: boolean;
+}
+
+export interface StructuredLab {
+  document_family: "structured_lab";
+  exam_name: string | null;
+  collection_date: string | null;
+  release_date: string | null;
+  sample_type: string | null;
+  findings: LabFinding[];
+  summary: string | null;
+  entities_for_memory: string[];
+}
+
+export interface ImagingReport {
+  document_family: "imaging_narrative";
+  modality: string | null;
+  body_region: string | null;
+  indication: string | null;
+  findings: string | null;
+  impression: string | null;
+  recommendations: string | null;
+  urgency: "routine" | "urgent" | "critical" | null;
+  comparison_with_prior: string | null;
+  summary: string | null;
+  entities_for_memory: string[];
+}
+
+export interface ClinicalNote {
+  document_family: "clinical_narrative";
+  chief_complaint: string | null;
+  symptoms: string[];
+  diagnoses: string[];
+  suspected_diagnoses: string[];
+  allergies: string[];
+  medications: string[];
+  conduct: string | null;
+  follow_up: string | null;
+  specialties: string[];
+  summary: string | null;
+  entities_for_memory: string[];
+}
+
+export interface MedicationDocument {
+  document_family: "medication_document";
+  medications: Array<{
+    name: string;
+    dose: string | null;
+    route: string | null;
+    frequency: string | null;
+    duration: string | null;
+    indication: string | null;
+  }>;
+  summary: string | null;
+  entities_for_memory: string[];
+}
+
+export type StructuredData = StructuredLab | ImagingReport | ClinicalNote | MedicationDocument | Record<string, unknown>;
+
+export interface StructuredResult {
+  document_family: string;
+  document_subtype: string | null;
+  extraction_confidence: number;
+  processing_version: string;
+  admin_metadata: Record<string, unknown>;
+  structured_data: StructuredData;
+  entities_for_memory: string[];
+  raw_clinical_text: string | null;
+}
+
 export interface DocumentDetail {
   document_id: string;
   original_name: string;
@@ -63,6 +139,7 @@ export interface DocumentDetail {
   anonymized_text: string;
   medical_entities: Entity[];
   pii_substitutions: string[];
+  structured_result: StructuredResult | null;
 }
 
 export async function getDocument(docId: string): Promise<DocumentDetail> {
