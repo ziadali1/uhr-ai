@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getDocument, type DocumentDetail, type StructuredLab, type ImagingReport, type ClinicalNote, type MedicationDocument } from "@/lib/api";
-import { Loader2, Pill, Stethoscope, AlertTriangle, X, FileText } from "lucide-react";
+import { getDocument, documentFileUrl, type DocumentDetail, type StructuredLab, type ImagingReport, type ClinicalNote, type MedicationDocument } from "@/lib/api";
+import { Loader2, Pill, Stethoscope, AlertTriangle, X, FileText, ExternalLink, Info } from "lucide-react";
 import { LabFindingsTable } from "./LabFindingsTable";
 import { ImagingReportView } from "./ImagingReportView";
 
@@ -194,12 +194,25 @@ export function DocumentDetail({ docId, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl">
         <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
-          <h2 className="font-semibold text-gray-900">
+          <h2 className="font-semibold text-gray-900 truncate max-w-sm">
             {detail?.original_name ?? "Detalhes do documento"}
           </h2>
-          <button onClick={onClose} className="rounded-md p-1 hover:bg-gray-100">
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {detail?.file_blob_url && (
+              <a
+                href={documentFileUrl(docId)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Abrir original
+              </a>
+            )}
+            <button onClick={onClose} className="rounded-md p-1 hover:bg-gray-100">
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+          </div>
         </div>
 
         <div className="space-y-6 p-6">
@@ -213,6 +226,17 @@ export function DocumentDetail({ docId, onClose }: Props) {
 
           {detail && (
             <>
+              {/* Banner for documents processed before pipeline redesign */}
+              {!detail.structured_result && detail.medical_entities.length === 0 && (
+                <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                  <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>
+                    Este documento foi processado antes da atualização do sistema.
+                    Reenvie-o para obter extração estruturada.
+                  </span>
+                </div>
+              )}
+
               {/* Structured result (primary view) */}
               {hasStructuredResult && (
                 <StructuredView detail={detail} />

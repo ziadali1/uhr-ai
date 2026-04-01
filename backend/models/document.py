@@ -106,7 +106,8 @@ class DocumentMetadata(BaseModel):
     file_type: Literal["pdf", "image"]
     upload_date: datetime
     entity_count: int
-    anonymized: bool = True
+    document_family: str | None = None
+    summary: str | None = None
 
 
 class DocumentListResponse(BaseModel):
@@ -132,3 +133,4 @@ class DocumentDetail(BaseModel):
     medical_entities: list[ExtractedEntity]
     pii_substitutions: list[str]
     structured_result: StructuredResult | None = None
+    file_blob_url: str | None = None

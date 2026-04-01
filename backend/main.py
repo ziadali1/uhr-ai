@@ -14,6 +14,7 @@ from api.documents import router as documents_router
 from api.chat import router as chat_router
 from api.analysis import router as analysis_router
 from api.emergency import router as emergency_router
+from api.health_profile import router as health_router
 
 app = FastAPI(
     title="UHR — Unified Health Record",
@@ -43,6 +44,7 @@ app.include_router(documents_router, tags=["Documentos"])
 app.include_router(chat_router, tags=["Agente IA"])
 app.include_router(analysis_router, tags=["Análise"])
 app.include_router(emergency_router, tags=["Emergência"])
+app.include_router(health_router, tags=["Saúde Manual"])
 
 
 @app.get("/health", tags=["Sistema"])

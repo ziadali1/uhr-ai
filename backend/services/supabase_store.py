@@ -35,6 +35,7 @@ def save(detail: DocumentDetail) -> None:
         "medical_entities": [e.model_dump() for e in detail.medical_entities],
         "pii_substitutions": detail.pii_substitutions,
         "upload_date": detail.upload_date.isoformat(),
+        "file_blob_url": detail.file_blob_url,
     }
     if detail.structured_result is not None:
         row["structured_result"] = detail.structured_result.model_dump()
@@ -85,4 +86,5 @@ def _row_to_detail(row: dict) -> DocumentDetail:
         medical_entities=[ExtractedEntity(**e) for e in (row["medical_entities"] or [])],
         pii_substitutions=row["pii_substitutions"] or [],
         structured_result=structured_result,
+        file_blob_url=row.get("file_blob_url"),
     )
