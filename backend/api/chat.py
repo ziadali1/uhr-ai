@@ -15,6 +15,7 @@ from services.azure.llm import chat_stream
 from utils.auth import get_current_user
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.post("/chat")
