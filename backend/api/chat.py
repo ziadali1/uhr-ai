@@ -6,7 +6,6 @@ Fluxo:
 """
 import json
 import logging
-from uuid import uuid4
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
@@ -33,16 +32,11 @@ def chat(
     try:
         system_prompt, sources = build_context_prompt(request.message, user_id)
     except Exception as e:
-        error_id = uuid4().hex[:8]
-        logger.exception("build_context_prompt failed [error_id=%s]", error_id)
-        print(f"[chat] build_context_prompt failed [error_id={error_id}] {type(e).__name__}: {e}")
+        logging.error("build_context_prompt failed: %s: %s", type(e).__name__, e)
 
         def error_stream():
             error_event = json.dumps(
-                {
-                    "type": "error",
-                    "content": f"Agente IA temporariamente indisponível. (ref: {error_id})",
-                },
+                {"type": "error", "content": "Agente IA temporariamente indisponível."},
             )
             yield f"data: {error_event}\n\n"
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
@@ -67,13 +61,8 @@ def chat(
                 token_event = json.dumps({"type": "token", "content": chunk})
                 yield f"data: {token_event}\n\n"
         except Exception as e:
-            error_id = uuid4().hex[:8]
-            logger.exception("chat_stream failed [error_id=%s]", error_id)
-            print(f"[chat] chat_stream failed [error_id={error_id}] {type(e).__name__}: {e}")
-            error_event = json.dumps({
-                "type": "error",
-                "content": f"Erro ao gerar resposta. (ref: {error_id})",
-            })
+            logging.error("chat_stream failed: %s: %s", type(e).__name__, e)
+            error_event = json.dumps({"type": "error", "content": "Erro ao gerar resposta."})
             yield f"data: {error_event}\n\n"
 
         # Sinaliza fim

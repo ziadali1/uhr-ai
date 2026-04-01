@@ -248,7 +248,7 @@ def extract_structured(clinical_text: str, document_family: str) -> dict:
         raw = generate_json(system=_SYSTEM_BASE, user=full_prompt)
         return _parse_json_response(raw)
     except Exception as e:
-        logger.exception(
+        logging.error(
             "extract_structured failed for family=%s: %s: %s",
             document_family,
             type(e).__name__,
