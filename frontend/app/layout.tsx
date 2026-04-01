@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import { Activity, Upload, MessageSquare, LayoutDashboard } from "lucide-react";
+import { Activity, Upload, MessageSquare, LayoutDashboard, Heart } from "lucide-react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -13,9 +13,10 @@ export const metadata: Metadata = {
 };
 
 const navItems = [
-  { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
-  { href: "/upload", label: "Documentos", icon: Upload },
-  { href: "/chat", label: "Agente IA", icon: MessageSquare },
+  { href: "/dashboard", label: "Painel",      icon: LayoutDashboard },
+  { href: "/upload",    label: "Documentos",  icon: Upload },
+  { href: "/saude",     label: "Saúde",       icon: Heart },
+  { href: "/chat",      label: "Agente IA",   icon: MessageSquare },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

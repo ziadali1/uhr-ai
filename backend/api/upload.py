@@ -1,13 +1,9 @@
 """
-POST /upload — receives a medical document and runs the hybrid pipeline:
-  1. OCR (Document Intelligence)
-  2. Document classification (family: lab, imaging, clinical, medication, unknown)
-  3. Admin/clinical text separation
-  4. Family-specific structured extraction via LLM
-  5. Entity building from structured result
-  6. Blob Storage upload
-  7. Azure AI Search indexation (RAG)
-  8. Supabase persistence
+POST /upload — recebe documento médico e executa o pipeline híbrido:
+  1. Upload do arquivo original no Blob Storage
+  2. OCR + classificação + limpeza + extração estruturada (pipeline v2)
+  3. Indexação no Azure AI Search (RAG)
+  4. Persistência no Supabase (texto + resultado estruturado + URL do original)
 """
 import uuid
 from datetime import datetime, timezone
@@ -29,6 +25,14 @@ ALLOWED_CONTENT_TYPES = {
     "image/png",
     "image/tiff",
     "image/webp",
+}
+
+_EXT_MAP = {
+    "application/pdf": "pdf",
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/tiff": "tiff",
+    "image/webp": "webp",
 }
 
 MAX_FILE_SIZE_MB = 10
@@ -53,16 +57,28 @@ async def upload_document(
             detail=f"Arquivo muito grande. Máximo: {MAX_FILE_SIZE_MB}MB.",
         )
 
+    doc_id = str(uuid.uuid4())
+
     try:
+        # 1. Store original file in blob (before pipeline — preserves original regardless of errors)
+        ext = _EXT_MAP.get(file.content_type or "", "bin")
+        file_blob_url = upload_blob(
+            file_bytes=file_bytes,
+            filename=f"{doc_id}_original.{ext}",
+            user_id=user_id,
+        )
+
+        # 2. Run hybrid pipeline (OCR → classify → clean → LLM extract → entities)
         result = orchestrator.run(file_bytes, file.filename or "document")
 
-        doc_id = str(uuid.uuid4())
-        blob_url = upload_blob(
+        # 3. Store OCR text blob (for RAG retrieval)
+        upload_blob(
             file_bytes=result.raw_text.encode("utf-8"),
             filename=f"{doc_id}.txt",
             user_id=user_id,
         )
 
+        # 4. Index in Azure AI Search
         index_after_upload(
             doc_id=doc_id,
             user_id=user_id,
@@ -71,6 +87,7 @@ async def upload_document(
             entities=result.entities,
         )
 
+        # 5. Persist to Supabase
         store_save(DocumentDetail(
             document_id=doc_id,
             user_id=user_id,
@@ -80,6 +97,7 @@ async def upload_document(
             medical_entities=result.entities,
             pii_substitutions=[],
             structured_result=result.structured_result,
+            file_blob_url=file_blob_url,
         ))
 
     except HTTPException:
@@ -94,7 +112,7 @@ async def upload_document(
         document_id=doc_id,
         message=f"Documento processado ({family}). {entity_count} achados clínicos identificados.",
         entity_count=entity_count,
-        blob_url=blob_url,
+        blob_url=file_blob_url,
         document_family=family,
         summary=result.summary,
     )

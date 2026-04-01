@@ -41,12 +41,18 @@ export async function listDocuments(): Promise<{
     original_name: string;
     upload_date: string;
     entity_count: number;
+    document_family: string | null;
+    summary: string | null;
   }>;
   total: number;
 }> {
   const res = await fetch(`${API_BASE}/documents`, { headers: await authHeaders() });
   if (!res.ok) throw new Error("Erro ao listar documentos");
   return res.json();
+}
+
+export function documentFileUrl(docId: string): string {
+  return `${API_BASE}/documents/${docId}/file`;
 }
 
 export interface Entity {
@@ -140,6 +146,53 @@ export interface DocumentDetail {
   medical_entities: Entity[];
   pii_substitutions: string[];
   structured_result: StructuredResult | null;
+  file_blob_url: string | null;
+}
+
+export type HealthEntryType = "medication_current" | "medication_past" | "complaint" | "allergy";
+
+export interface HealthEntry {
+  id: string;
+  user_id: string;
+  entry_type: HealthEntryType;
+  name: string;
+  details: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  active: boolean;
+  created_at: string;
+}
+
+export interface HealthEntryCreate {
+  entry_type: HealthEntryType;
+  name: string;
+  details?: string;
+  started_at?: string;
+  ended_at?: string;
+}
+
+export async function listHealthEntries(): Promise<HealthEntry[]> {
+  const res = await fetch(`${API_BASE}/saude`, { headers: await authHeaders() });
+  if (!res.ok) throw new Error("Erro ao carregar entradas de saúde");
+  return res.json();
+}
+
+export async function createHealthEntry(entry: HealthEntryCreate): Promise<HealthEntry> {
+  const res = await fetch(`${API_BASE}/saude`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...await authHeaders() },
+    body: JSON.stringify(entry),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+export async function deleteHealthEntry(id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/saude/${id}`, {
+    method: "DELETE",
+    headers: await authHeaders(),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
 }
 
 export async function getDocument(docId: string): Promise<DocumentDetail> {
