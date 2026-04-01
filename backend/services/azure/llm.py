@@ -72,6 +72,30 @@ def _mock_stream(messages: list[dict], sources: list[str]) -> Generator[str, Non
         time.sleep(0.03)
 
 
+def generate_json(system: str, user: str) -> str:
+    """
+    Single-turn Claude call for structured JSON extraction.
+    Returns raw response string (caller parses JSON).
+    """
+    if _use_mock():
+        return "{}"
+
+    import anthropic
+
+    client = anthropic.Anthropic(
+        base_url=os.environ["ANTHROPIC_BASE_URL"],
+        api_key=os.environ["ANTHROPIC_API_KEY"],
+        default_headers={"api-key": os.environ["ANTHROPIC_API_KEY"]},
+    )
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=2048,
+        system=system,
+        messages=[{"role": "user", "content": user}],
+    )
+    return response.content[0].text
+
+
 def _build_mock_response(question: str, sources: list[str]) -> str:
     q = question.lower()
     has_docs = bool(sources)

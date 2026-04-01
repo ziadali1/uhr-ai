@@ -1,11 +1,13 @@
 """
-POST /upload — recebe documento médico e executa o pipeline completo:
+POST /upload — receives a medical document and runs the hybrid pipeline:
   1. OCR (Document Intelligence)
-  2. Extração de entidades (Text Analytics for Health)
-  3. Anonimização (pipeline)
-  4. Upload no Blob Storage (versão anonimizada)
-  5. Indexação no Azure AI Search (RAG)
-  6. Retorna metadados do documento processado
+  2. Document classification (family: lab, imaging, clinical, medication, unknown)
+  3. Admin/clinical text separation
+  4. Family-specific structured extraction via LLM
+  5. Entity building from structured result
+  6. Blob Storage upload
+  7. Azure AI Search indexation (RAG)
+  8. Supabase persistence
 """
 import uuid
 from datetime import datetime, timezone
@@ -14,9 +16,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from models.document import DocumentDetail, UploadResponse
 from services.azure.blob_storage import upload_blob
-from services.azure.document_intelligence import extract_text
-from services.azure.text_analytics import extract_health_entities
 from services.document_store import save as store_save
+from services.pipeline import orchestrator
 from services.rag.indexer import index_after_upload
 from utils.auth import get_current_user
 
@@ -38,7 +39,6 @@ async def upload_document(
     file: UploadFile = File(...),
     user_id: str = Depends(get_current_user),
 ):
-    # Validação de tipo
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise HTTPException(
             status_code=415,
@@ -47,7 +47,6 @@ async def upload_document(
 
     file_bytes = await file.read()
 
-    # Validação de tamanho
     if len(file_bytes) > MAX_FILE_SIZE_MB * 1024 * 1024:
         raise HTTPException(
             status_code=413,
@@ -55,46 +54,32 @@ async def upload_document(
         )
 
     try:
-        # 1. OCR
-        import logging
-        logging.warning("UPLOAD: iniciando OCR")
-        raw_text = extract_text(file_bytes, file.filename or "document")
-        logging.warning("UPLOAD: OCR concluído")
+        result = orchestrator.run(file_bytes, file.filename or "document")
 
-        # 2. Extração de entidades clínicas
-        logging.warning("UPLOAD: iniciando extração de entidades")
-        entities = extract_health_entities(raw_text)
-        logging.warning("UPLOAD: entidades extraídas")
-
-        # 3. Upload do texto completo (sem anonimização — usuário consentiu)
         doc_id = str(uuid.uuid4())
-        txt_filename = f"{doc_id}.txt"
-        logging.warning("UPLOAD: iniciando blob upload")
         blob_url = upload_blob(
-            file_bytes=raw_text.encode("utf-8"),
-            filename=txt_filename,
+            file_bytes=result.raw_text.encode("utf-8"),
+            filename=f"{doc_id}.txt",
             user_id=user_id,
         )
-        logging.warning("UPLOAD: blob upload concluído")
 
-        # 4. Indexação no Azure AI Search para RAG
         index_after_upload(
             doc_id=doc_id,
             user_id=user_id,
-            anonymized_text=raw_text,
+            anonymized_text=result.raw_text,
             source_name=file.filename or "document",
-            entities=entities,
+            entities=result.entities,
         )
 
-        # 5. Persistência no Supabase
         store_save(DocumentDetail(
             document_id=doc_id,
             user_id=user_id,
             original_name=file.filename or "document",
             upload_date=datetime.now(timezone.utc),
-            anonymized_text=raw_text,
-            medical_entities=entities,
+            anonymized_text=result.raw_text,
+            medical_entities=result.entities,
             pii_substitutions=[],
+            structured_result=result.structured_result,
         ))
 
     except HTTPException:
@@ -102,9 +87,14 @@ async def upload_document(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao processar documento: {e}")
 
+    family = result.structured_result.document_family
+    entity_count = len(result.entities)
+
     return UploadResponse(
         document_id=doc_id,
-        message=f"Documento processado com sucesso. {len(entities)} entidades clínicas identificadas.",
-        entity_count=len(entities),
+        message=f"Documento processado ({family}). {entity_count} achados clínicos identificados.",
+        entity_count=entity_count,
         blob_url=blob_url,
+        document_family=family,
+        summary=result.summary,
     )
