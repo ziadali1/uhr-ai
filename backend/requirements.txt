@@ -12,6 +12,7 @@ azure-storage-blob==12.19.1
 
 # LLM
 anthropic==0.28.0
+openai>=1.0.0
 
 # Auth & DB
 supabase==2.4.6
