@@ -2,10 +2,12 @@
 POST /chat — agente IA com RAG por paciente.
 
 Fluxo:
-  pergunta → busca documentos do usuário (RAG) → monta prompt → Claude → streaming SSE
+  pergunta → busca documentos do usuário (RAG) → monta prompt → LLM → streaming SSE
 """
 import json
 import logging
+import traceback
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
@@ -23,22 +25,44 @@ def chat(
     request: ChatRequest,
     user_id: str = Depends(get_current_user),
 ):
+    logger.info("POST /chat called | user_id=%s", user_id)
+
     history = [
         {"role": m.role, "content": m.content}
         for m in request.history
     ]
     history.append({"role": "user", "content": request.message})
 
+    logger.info(
+        "Chat request prepared | history_len=%s | message_len=%s",
+        len(history),
+        len(request.message or ""),
+    )
+
     try:
+        logger.info("Calling build_context_prompt...")
         system_prompt, sources = build_context_prompt(request.message, user_id)
+        logger.info(
+            "build_context_prompt succeeded | sources_count=%s | sources=%s | system_prompt_len=%s",
+            len(sources) if sources else 0,
+            sources,
+            len(system_prompt or ""),
+        )
     except Exception as e:
-        logging.error("build_context_prompt failed: %s: %s", type(e).__name__, e)
+        logger.exception("build_context_prompt failed")
 
         def error_stream():
-            error_event = json.dumps(
-                {"type": "error", "content": "Agente IA temporariamente indisponível."},
-            )
-            yield f"data: {error_event}\n\n"
+            debug_payload = {
+                "type": "error",
+                "content": "Agente IA temporariamente indisponível.",
+                "debug": {
+                    "stage": "build_context_prompt",
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "traceback": traceback.format_exc(),
+                },
+            }
+            yield f"data: {json.dumps(debug_payload)}\n\n"
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
         return StreamingResponse(
@@ -51,21 +75,45 @@ def chat(
         )
 
     def event_stream():
-        # Envia as fontes como primeiro evento
-        sources_event = json.dumps({"type": "sources", "sources": sources})
-        yield f"data: {sources_event}\n\n"
+        logger.info("Starting SSE event_stream...")
 
-        # Stream de tokens do LLM
         try:
+            sources_event = json.dumps({"type": "sources", "sources": sources})
+            yield f"data: {sources_event}\n\n"
+            logger.info("Sources event sent")
+        except Exception:
+            logger.exception("Failed to send sources event")
+            raise
+
+        try:
+            logger.info("Calling chat_stream...")
+            chunk_count = 0
+
             for chunk in chat_stream(system_prompt, history, sources):
+                chunk_count += 1
+                logger.info("chat_stream chunk received | chunk_count=%s", chunk_count)
+
                 token_event = json.dumps({"type": "token", "content": chunk})
                 yield f"data: {token_event}\n\n"
-        except Exception as e:
-            logging.error("chat_stream failed: %s: %s", type(e).__name__, e)
-            error_event = json.dumps({"type": "error", "content": "Erro ao gerar resposta."})
-            yield f"data: {error_event}\n\n"
 
-        # Sinaliza fim
+            logger.info("chat_stream finished successfully | total_chunks=%s", chunk_count)
+
+        except Exception as e:
+            logger.exception("chat_stream failed")
+
+            error_event = {
+                "type": "error",
+                "content": "Erro ao gerar resposta.",
+                "debug": {
+                    "stage": "chat_stream",
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "traceback": traceback.format_exc(),
+                },
+            }
+            yield f"data: {json.dumps(error_event)}\n\n"
+
+        logger.info("Sending done event")
         yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
     return StreamingResponse(
