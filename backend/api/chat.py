@@ -1,15 +1,16 @@
 """
 POST /chat — agente IA com RAG por paciente.
 
-Fluxo:
-  pergunta → busca documentos do usuário (RAG) → monta prompt → LLM → streaming SSE
+MODO DEBUG TEMPORÁRIO:
+- Desabilita SSE temporariamente
+- Retorna JSONResponse com erro detalhado
+- Facilita diagnosticar falhas em build_context_prompt e chat_stream
 """
-import json
 import logging
 import traceback
 
 from fastapi import APIRouter, Depends
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse
 
 from models.chat import ChatRequest
 from services.rag.retriever import build_context_prompt
@@ -50,77 +51,53 @@ def chat(
         )
     except Exception as e:
         logger.exception("build_context_prompt failed")
-
-        def error_stream():
-            debug_payload = {
-                "type": "error",
-                "content": "Agente IA temporariamente indisponível.",
-                "debug": {
-                    "stage": "build_context_prompt",
-                    "error_type": type(e).__name__,
-                    "error_message": str(e),
-                    "traceback": traceback.format_exc(),
-                },
-            }
-            yield f"data: {json.dumps(debug_payload)}\n\n"
-            yield f"data: {json.dumps({'type': 'done'})}\n\n"
-
-        return StreamingResponse(
-            error_stream(),
-            media_type="text/event-stream",
-            headers={
-                "Cache-Control": "no-cache",
-                "X-Accel-Buffering": "no",
+        return JSONResponse(
+            status_code=500,
+            content={
+                "ok": False,
+                "stage": "build_context_prompt",
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "traceback": traceback.format_exc(),
             },
         )
 
-    def event_stream():
-        logger.info("Starting SSE event_stream...")
+    try:
+        logger.info("Calling chat_stream in debug non-stream mode...")
 
-        try:
-            sources_event = json.dumps({"type": "sources", "sources": sources})
-            yield f"data: {sources_event}\n\n"
-            logger.info("Sources event sent")
-        except Exception:
-            logger.exception("Failed to send sources event")
-            raise
+        full_text = ""
+        chunk_count = 0
 
-        try:
-            logger.info("Calling chat_stream...")
-            chunk_count = 0
+        for chunk in chat_stream(system_prompt, history, sources):
+            chunk_count += 1
+            full_text += chunk
 
-            for chunk in chat_stream(system_prompt, history, sources):
-                chunk_count += 1
-                logger.info("chat_stream chunk received | chunk_count=%s", chunk_count)
+        logger.info(
+            "chat_stream finished successfully | chunk_count=%s | response_len=%s",
+            chunk_count,
+            len(full_text),
+        )
 
-                token_event = json.dumps({"type": "token", "content": chunk})
-                yield f"data: {token_event}\n\n"
+        return JSONResponse(
+            status_code=200,
+            content={
+                "ok": True,
+                "stage": "done",
+                "sources": sources,
+                "response": full_text,
+                "chunk_count": chunk_count,
+            },
+        )
 
-            logger.info("chat_stream finished successfully | total_chunks=%s", chunk_count)
-
-        except Exception as e:
-            logger.exception("chat_stream failed")
-
-            error_event = {
-                "type": "error",
-                "content": "Erro ao gerar resposta.",
-                "debug": {
-                    "stage": "chat_stream",
-                    "error_type": type(e).__name__,
-                    "error_message": str(e),
-                    "traceback": traceback.format_exc(),
-                },
-            }
-            yield f"data: {json.dumps(error_event)}\n\n"
-
-        logger.info("Sending done event")
-        yield f"data: {json.dumps({'type': 'done'})}\n\n"
-
-    return StreamingResponse(
-        event_stream(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-        },
-    )
+    except Exception as e:
+        logger.exception("chat_stream failed")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "ok": False,
+                "stage": "chat_stream",
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "traceback": traceback.format_exc(),
+            },
+        )
