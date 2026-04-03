@@ -16,16 +16,14 @@ def _use_mock() -> bool:
 
 
 def _get_client():
-    from openai import AzureOpenAI
+    from openai import OpenAI
 
-    endpoint = os.environ["AZURE_OPENAI_ENDPOINT"]
+    base_url = os.environ["AZURE_OPENAI_BASE_URL"]
     api_key = os.environ["AZURE_OPENAI_API_KEY"]
-    api_version = os.getenv("AZURE_OPENAI_API_VERSION", "2024-10-21")
 
-    return AzureOpenAI(
-        azure_endpoint=endpoint,
+    return OpenAI(
+        base_url=base_url,
         api_key=api_key,
-        api_version=api_version,
     )
 
 
@@ -74,7 +72,7 @@ def chat_stream(
                 yield delta.content
 
     except Exception:
-        logger.exception("Azure OpenAI streaming call failed")
+        logger.exception("OpenAI streaming call failed")
         raise
 
 
@@ -108,7 +106,7 @@ def generate_json(system: str, user: str) -> str:
         return content if content else "{}"
 
     except Exception:
-        logger.exception("Azure OpenAI JSON call failed")
+        logger.exception("OpenAI JSON call failed")
         raise
 
 
