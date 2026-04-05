@@ -51,6 +51,8 @@ Next: Phase transition — all plans complete
 
 - [Phase 01-03]: OCR callable injected into router as argument to prevent circular import between document_intelligence and router
 - [Phase 01-03]: extract_text_with_meta() added as metadata-rich variant for Plan 4 to use when persisting extraction results
+- [Phase 01-04]: Pipeline orchestrator updated to use extract_text_with_meta() to avoid double extraction; exposes extraction_result in PipelineResult
+- [Phase 01-04]: supabase_store text_extraction_meta INSERT wrapped in try/except pending Supabase migration
 - [Phase 01-05]: fitz imported at module level in router.py to support unittest.mock patching
 - [Phase 01-05]: PasswordProtectedError raises HTTP 422 with Portuguese message; caught before generic Exception handler in upload.py
 
@@ -61,6 +63,7 @@ Next: Phase transition — all plans complete
 | 01 | 01 | 2min | 2 | 6 |
 | 01 | 02 | 2min | 2 | 2 |
 | 01 | 03 | 2min | 2 | 3 |
+| 01 | 04 | 3min | 2 | 5 |
 | 01 | 05 | 8min | 2 | 6 |
 
 ## Last Session

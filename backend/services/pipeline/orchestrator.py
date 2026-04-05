@@ -15,7 +15,7 @@ Returns a PipelineResult with all data needed for storage, RAG, and UI.
 from dataclasses import dataclass, field
 
 from models.document import ExtractedEntity, StructuredResult
-from services.azure.document_intelligence import extract_text
+from services.azure.document_intelligence import extract_text_with_meta
 from services.pipeline.classifier import classify
 from services.pipeline.cleaner import clean
 from services.pipeline.extractor import extract_structured
@@ -27,6 +27,7 @@ class PipelineResult:
     structured_result: StructuredResult
     entities: list[ExtractedEntity]      # for legacy RAG/search compatibility
     summary: str | None = None
+    extraction_result: dict | None = None  # raw dict from extract_text_with_meta()
 
 
 def _build_entities_from_structured(structured_data: dict, document_family: str) -> list[ExtractedEntity]:
@@ -103,8 +104,9 @@ def run(file_bytes: bytes, filename: str) -> PipelineResult:
     Returns:
         PipelineResult with structured data, entities, and summary
     """
-    # Step 1: OCR
-    raw_text = extract_text(file_bytes, filename)
+    # Step 1: Extract text (adaptive: native PyMuPDF or Azure OCR)
+    extraction_result = extract_text_with_meta(file_bytes, filename)
+    raw_text = extraction_result["text"]
 
     # Step 2: Classify
     document_family, confidence = classify(raw_text)
@@ -143,4 +145,5 @@ def run(file_bytes: bytes, filename: str) -> PipelineResult:
         structured_result=structured_result,
         entities=entities,
         summary=summary,
+        extraction_result=extraction_result,
     )
