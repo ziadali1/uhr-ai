@@ -19,7 +19,7 @@
 **Plans:** 5 plans
 
 Plans:
-- [ ] 01-PLAN-1-page-classifier.md — Add pymupdf; implement is_native_page() classifier (char count, image coverage, font sanity)
+- [x] 01-PLAN-1-page-classifier.md — Add pymupdf; implement is_native_page() classifier (char count, image coverage, font sanity) ✓ 2026-04-05
 - [ ] 01-PLAN-2-native-extraction-quality-score.md — Implement extract_text_native() and compute_quality_score() (4-signal weighted)
 - [ ] 01-PLAN-3-adaptive-router.md — Wire adaptive routing into document_intelligence.py; preserve orchestrator interface
 - [ ] 01-PLAN-4-metadata-storage.md — Add ExtractionMeta model; persist text_extraction_meta JSONB on every upload

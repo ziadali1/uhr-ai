@@ -7,7 +7,7 @@
 
 ### Ingestion
 
-- [ ] **INGEST-01**: System detects whether a PDF has native text (character density, image coverage, font analysis) before routing to OCR
+- [x] **INGEST-01**: System detects whether a PDF has native text (character density, image coverage, font analysis) before routing to OCR — completed 01-01 (2026-04-05)
 - [ ] **INGEST-02**: System extracts text natively from native-text PDFs using PyMuPDF when quality score ≥ 0.65
 - [ ] **INGEST-03**: System falls back to Azure Document Intelligence OCR when native extraction is absent or low quality
 - [ ] **INGEST-04**: System computes a deterministic quality score [0,1] for each extracted text version
