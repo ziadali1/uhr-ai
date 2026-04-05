@@ -39,12 +39,12 @@ Plans:
 
 **Requirements:** STORE-01, STORE-02, STORE-03
 
-**Plans:**
-1. Create 5 Postgres tables via Supabase migration: `patient_observations`, `patient_conditions`, `patient_medications`, `patient_allergies`, `patient_imaging_findings` (with dedup keys, FHIR-inspired schema)
-2. Implement `analyte_aliases` lookup table with Portuguese → canonical name mappings for common lab tests
-3. Implement `services/patient_store.py`: promotion functions per document family (lab → observations, clinical → conditions/medications, etc.)
-4. Wire promotion step into upload pipeline (`api/upload.py`) after existing RAG indexing — additive, never overwrites
-5. Unit-test promotion logic with fixture documents from each family
+**Plans:** 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Create 6 Postgres tables (5 patient + analyte_aliases) via Supabase migration with seed data; Pydantic models
+- [ ] 02-02-PLAN.md — Implement patient_store.py promotion functions per document family with dedup, alias lookup, conflict detection; unit tests
+- [ ] 02-03-PLAN.md — Wire promotion into upload pipeline after store_save; end-to-end verification
 
 **Done when:**
 - Upload of a lab PDF creates rows in `patient_observations`
@@ -218,3 +218,4 @@ Phase 8 (Security) ── independent, can run in parallel with Phase 4-6
 ---
 *Roadmap created: 2026-04-04*
 *Phase 1 plans created: 2026-04-02*
+*Phase 2 plans created: 2026-04-05*
