@@ -3,6 +3,21 @@ from typing import Any, Literal
 from pydantic import BaseModel
 
 
+class ExtractionMeta(BaseModel):
+    """
+    Metadata about how text was extracted from a document.
+    Stored as JSONB in documents.text_extraction_meta.
+
+    Fields match the dict returned by extract_text_with_meta() in document_intelligence.py.
+    """
+    method: str                        # "native" | "ocr"
+    quality_score: float               # [0.0, 1.0]
+    page_strategies: list[dict] = []   # per-page is_native_page() results
+    library: str                       # e.g. "pymupdf/1.24.5" or "azure-ai-formrecognizer/3.3.3"
+    fallback_reason: str | None = None # why native was rejected, or None
+    extracted_at: str                  # ISO 8601 datetime string
+
+
 class ExtractedEntity(BaseModel):
     text: str
     category: str          # Medication, Diagnosis, Symptom, etc.
@@ -134,3 +149,4 @@ class DocumentDetail(BaseModel):
     pii_substitutions: list[str]
     structured_result: StructuredResult | None = None
     file_blob_url: str | None = None
+    text_extraction_meta: ExtractionMeta | None = None
