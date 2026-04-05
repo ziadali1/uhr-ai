@@ -16,7 +16,7 @@
 
 **Requirements:** INGEST-01, INGEST-02, INGEST-03, INGEST-04, INGEST-05, INGEST-06
 
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [x] 01-PLAN-1-page-classifier.md — Add pymupdf; implement is_native_page() classifier (char count, image coverage, font sanity) ✓ 2026-04-05
