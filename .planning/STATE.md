@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 2 of 5
+current_plan: 4 of 5
 status: in_progress
-stopped_at: Completed 01-02-native-extraction-quality-score-PLAN.md
-last_updated: "2026-04-05T13:44:46.890Z"
+stopped_at: Completed 01-03-adaptive-router-PLAN.md
+last_updated: "2026-04-05T13:50:09.703Z"
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 5
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 ## Current Phase
 
-**Phase 1: Adaptive Text Extraction** — In progress (Plan 2/5 complete)
+**Phase 1: Adaptive Text Extraction** — In progress (Plan 3/5 complete)
 
-Current Plan: 3 of 5
-Next: Execute plan 01-03 (extraction-router)
+Current Plan: 4 of 5
+Next: Execute plan 01-04 (metadata-storage)
 
 ## Milestone
 
@@ -49,16 +49,20 @@ Next: Execute plan 01-03 (extraction-router)
 | 01-02 | Line length signal gates on printable-char presence to avoid false positives on pure garbage blobs |
 | 01-02 | fitz imported at module level in extractor.py; is_native_page imported via services.extraction.classifier |
 
+- [Phase 01-03]: OCR callable injected into router as argument to prevent circular import between document_intelligence and router
+- [Phase 01-03]: extract_text_with_meta() added as metadata-rich variant for Plan 4 to use when persisting extraction results
+
 ## Performance Metrics
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 01 | 01 | 2min | 2 | 6 |
 | 01 | 02 | 2min | 2 | 2 |
+| 01 | 03 | 2min | 2 | 3 |
 
 ## Last Session
 
-**Stopped at:** Completed 01-02-native-extraction-quality-score-PLAN.md
+**Stopped at:** Completed 01-03-adaptive-router-PLAN.md
 **Timestamp:** 2026-04-05T13:38:00Z
 
 ## Key Context
