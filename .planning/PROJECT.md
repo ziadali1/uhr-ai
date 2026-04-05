@@ -27,10 +27,10 @@ A patient's complete medical history — reliably extracted, reliably retrievabl
 
 **Milestone 1 — Ingestion Foundation (current focus)**
 
-- [ ] Adaptive text extraction: detect native-text PDFs and extract natively before falling back to OCR
+- [x] Adaptive text extraction: detect native-text PDFs and extract natively before falling back to OCR — *Validated in Phase 1: adaptive-text-extraction*
+- [x] Extraction quality scoring: deterministic 4-signal weighted scorer — *Validated in Phase 1*
+- [x] Processing diagnostics: `text_extraction_meta` JSONB stored per document (method, score, page strategies, library) — *Validated in Phase 1*
 - [ ] Multi-version text storage: store native, OCR, and selected-best versions with quality scores
-- [ ] Extraction quality scoring: deterministic signal (character density, symbol ratio, line structure)
-- [ ] Processing diagnostics: trace how each document was processed (method used, confidence, version selected)
 - [ ] Cleaner, higher-quality clinical text indexed into RAG — replacing the current OCR-degraded content
 
 **Milestone 2 — Structured Data Foundation**
@@ -89,9 +89,9 @@ A patient's complete medical history — reliably extracted, reliably retrievabl
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Adaptive extraction before retrieval improvements | Garbage in = garbage out; fixing extraction quality unblocks everything downstream | — Pending |
+| Adaptive extraction before retrieval improvements | Garbage in = garbage out; fixing extraction quality unblocks everything downstream | Phase 1 complete — adaptive router wired |
 | Store multiple text versions (native + OCR + selected) | Enables quality comparison, debugging, and future re-processing without re-uploading | — Pending |
-| Quality scoring via deterministic signals | Avoids LLM cost per document just to score quality; character density and symbol ratio are reliable proxies | — Pending |
+| Quality scoring via deterministic signals | Avoids LLM cost per document just to score quality; character density and symbol ratio are reliable proxies | Phase 1 complete — 4-signal weighted scorer |
 | Longitudinal profile before clinical reasoning | Clinical reasoning requires reliable structured data across time; must build the data layer first | — Pending |
 
 ## Evolution
@@ -112,4 +112,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after initialization*
+*Last updated: 2026-04-05 after Phase 1 completion (adaptive-text-extraction)*
