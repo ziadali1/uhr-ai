@@ -16,12 +16,14 @@
 
 **Requirements:** INGEST-01, INGEST-02, INGEST-03, INGEST-04, INGEST-05, INGEST-06
 
-**Plans:**
-1. Add `pymupdf` dependency; implement `is_native_page()` classifier (char count, image coverage ratio, font sanity)
-2. Implement `extract_text_native()` with PyMuPDF and `compute_quality_score()` (4-signal weighted scoring)
-3. Refactor `services/azure/document_intelligence.py` into `services/extraction/` with adaptive routing: native → score → fallback OCR
-4. Add `text_extraction_meta JSONB` column to `documents` table; store method, quality score, page strategies, library version
-5. Handle medical PDF edge cases: password-protected (422), corrupt (self-repair + OCR fallback), AcroForm fields (`page.widgets()`), ICP-Brasil signed PDFs
+**Plans:** 5 plans
+
+Plans:
+- [ ] 01-PLAN-1-page-classifier.md — Add pymupdf; implement is_native_page() classifier (char count, image coverage, font sanity)
+- [ ] 01-PLAN-2-native-extraction-quality-score.md — Implement extract_text_native() and compute_quality_score() (4-signal weighted)
+- [ ] 01-PLAN-3-adaptive-router.md — Wire adaptive routing into document_intelligence.py; preserve orchestrator interface
+- [ ] 01-PLAN-4-metadata-storage.md — Add ExtractionMeta model; persist text_extraction_meta JSONB on every upload
+- [ ] 01-PLAN-5-edge-cases.md — Handle password-protected, corrupt, QR code, AcroForm, and ICP-Brasil PDFs
 
 **Done when:**
 - Native-text PDFs extract without calling Azure Document Intelligence
@@ -215,4 +217,4 @@ Phase 8 (Security) ── independent, can run in parallel with Phase 4-6
 
 ---
 *Roadmap created: 2026-04-04*
-*Next: `/gsd:plan-phase 1` to plan Phase 1 in detail*
+*Phase 1 plans created: 2026-04-02*
