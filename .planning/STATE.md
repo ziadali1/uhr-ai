@@ -2,13 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
+current_plan: 2 of 5
 status: in_progress
-last_updated: "2026-04-05T13:38:00.000Z"
+stopped_at: Completed 01-02-native-extraction-quality-score-PLAN.md
+last_updated: "2026-04-05T13:44:46.890Z"
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -22,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 ## Current Phase
 
-**Phase 1: Adaptive Text Extraction** — In progress (Plan 1/5 complete)
+**Phase 1: Adaptive Text Extraction** — In progress (Plan 2/5 complete)
 
-Current Plan: 2 of 5
-Next: Execute plan 01-02 (native-extraction-quality-score)
+Current Plan: 3 of 5
+Next: Execute plan 01-03 (extraction-router)
 
 ## Milestone
 
@@ -44,16 +46,19 @@ Next: Execute plan 01-02 (native-extraction-quality-score)
 | 01-01 | Return plain dict from is_native_page() to prevent circular imports with orchestrator |
 | 01-01 | Font reality checked via GlyphLessFont name blocklist AND size-0 span filter |
 | 01-01 | Three-signal classifier: char>=50, image_coverage<0.60, has_real_fonts |
+| 01-02 | Line length signal gates on printable-char presence to avoid false positives on pure garbage blobs |
+| 01-02 | fitz imported at module level in extractor.py; is_native_page imported via services.extraction.classifier |
 
 ## Performance Metrics
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 01 | 01 | 2min | 2 | 6 |
+| 01 | 02 | 2min | 2 | 2 |
 
 ## Last Session
 
-**Stopped at:** Completed 01-01-page-classifier-PLAN.md
+**Stopped at:** Completed 01-02-native-extraction-quality-score-PLAN.md
 **Timestamp:** 2026-04-05T13:38:00Z
 
 ## Key Context

@@ -8,9 +8,9 @@
 ### Ingestion
 
 - [x] **INGEST-01**: System detects whether a PDF has native text (character density, image coverage, font analysis) before routing to OCR — completed 01-01 (2026-04-05)
-- [ ] **INGEST-02**: System extracts text natively from native-text PDFs using PyMuPDF when quality score ≥ 0.65
+- [x] **INGEST-02**: System extracts text natively from native-text PDFs using PyMuPDF when quality score ≥ 0.65
 - [ ] **INGEST-03**: System falls back to Azure Document Intelligence OCR when native extraction is absent or low quality
-- [ ] **INGEST-04**: System computes a deterministic quality score [0,1] for each extracted text version
+- [x] **INGEST-04**: System computes a deterministic quality score [0,1] for each extracted text version
 - [ ] **INGEST-05**: System stores extraction metadata (method, quality score, page strategies, library version) with each document in `text_extraction_meta` JSONB column
 - [ ] **INGEST-06**: System handles medical PDF edge cases: password-protected, corrupt, AcroForm fields, ICP-Brasil signed PDFs
 
@@ -86,9 +86,9 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INGEST-01 | Phase 1 | Pending |
-| INGEST-02 | Phase 1 | Pending |
+| INGEST-02 | Phase 1 | Complete |
 | INGEST-03 | Phase 1 | Pending |
-| INGEST-04 | Phase 1 | Pending |
+| INGEST-04 | Phase 1 | Complete |
 | INGEST-05 | Phase 1 | Pending |
 | INGEST-06 | Phase 1 | Pending |
 | STORE-01 | Phase 2 | Pending |
