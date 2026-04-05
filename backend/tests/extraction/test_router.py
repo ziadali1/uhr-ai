@@ -31,6 +31,7 @@ def test_all_native_high_score_uses_native():
          patch("services.extraction.router.is_native_page", return_value=native_classify), \
          patch("services.extraction.router.extract_text_native", return_value="Texto nativo longo e rico" * 20), \
          patch("services.extraction.router.compute_quality_score", return_value=0.80):
+        mock_fitz.__version__ = "1.24.0"
         mock_page = MagicMock()
         mock_doc = MagicMock()
         mock_doc.__iter__ = MagicMock(return_value=iter([mock_page]))
