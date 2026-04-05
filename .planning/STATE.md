@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 4 of 5
+current_plan: 5 of 5
 status: in_progress
-stopped_at: Completed 01-03-adaptive-router-PLAN.md
-last_updated: "2026-04-05T13:50:09.703Z"
+stopped_at: Completed 01-04-metadata-storage-PLAN.md
+last_updated: "2026-04-05T13:56:00.083Z"
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -51,6 +51,8 @@ Next: Execute plan 01-04 (metadata-storage)
 
 - [Phase 01-03]: OCR callable injected into router as argument to prevent circular import between document_intelligence and router
 - [Phase 01-03]: extract_text_with_meta() added as metadata-rich variant for Plan 4 to use when persisting extraction results
+- [Phase 01-04]: Pipeline orchestrator updated to use extract_text_with_meta() to avoid double extraction; exposes extraction_result in PipelineResult
+- [Phase 01-04]: supabase_store text_extraction_meta INSERT wrapped in try/except pending Supabase migration
 
 ## Performance Metrics
 
@@ -59,10 +61,11 @@ Next: Execute plan 01-04 (metadata-storage)
 | 01 | 01 | 2min | 2 | 6 |
 | 01 | 02 | 2min | 2 | 2 |
 | 01 | 03 | 2min | 2 | 3 |
+| Phase 01 P04 | 3min | 2 tasks | 5 files |
 
 ## Last Session
 
-**Stopped at:** Completed 01-03-adaptive-router-PLAN.md
+**Stopped at:** Completed 01-04-metadata-storage-PLAN.md
 **Timestamp:** 2026-04-05T13:38:00Z
 
 ## Key Context

@@ -11,7 +11,7 @@
 - [x] **INGEST-02**: System extracts text natively from native-text PDFs using PyMuPDF when quality score ≥ 0.65
 - [x] **INGEST-03**: System falls back to Azure Document Intelligence OCR when native extraction is absent or low quality
 - [x] **INGEST-04**: System computes a deterministic quality score [0,1] for each extracted text version
-- [ ] **INGEST-05**: System stores extraction metadata (method, quality score, page strategies, library version) with each document in `text_extraction_meta` JSONB column
+- [x] **INGEST-05**: System stores extraction metadata (method, quality score, page strategies, library version) with each document in `text_extraction_meta` JSONB column
 - [ ] **INGEST-06**: System handles medical PDF edge cases: password-protected, corrupt, AcroForm fields, ICP-Brasil signed PDFs
 
 ### Patient Data Model
@@ -89,7 +89,7 @@
 | INGEST-02 | Phase 1 | Complete |
 | INGEST-03 | Phase 1 | Complete |
 | INGEST-04 | Phase 1 | Complete |
-| INGEST-05 | Phase 1 | Pending |
+| INGEST-05 | Phase 1 | Complete |
 | INGEST-06 | Phase 1 | Pending |
 | STORE-01 | Phase 2 | Pending |
 | STORE-02 | Phase 2 | Pending |
