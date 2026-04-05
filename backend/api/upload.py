@@ -14,6 +14,7 @@ from models.document import DocumentDetail, ExtractionMeta, UploadResponse
 from services.azure.blob_storage import upload_blob
 from services.azure.document_intelligence import extract_text_with_meta
 from services.document_store import save as store_save
+from services.extraction.router import PasswordProtectedError
 from services.pipeline import orchestrator
 from services.rag.indexer import index_after_upload
 from utils.auth import get_current_user
@@ -114,6 +115,11 @@ async def upload_document(
             text_extraction_meta=extraction_meta,
         ))
 
+    except PasswordProtectedError as e:
+        raise HTTPException(
+            status_code=422,
+            detail=f"PDF protegido por senha: {e}. Por favor, remova a proteção antes de fazer upload.",
+        )
     except HTTPException:
         raise
     except Exception as e:
