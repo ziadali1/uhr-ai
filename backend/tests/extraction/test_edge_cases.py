@@ -51,6 +51,7 @@ def test_print_only_protection_proceeds_normally():
         mock_doc.__iter__ = MagicMock(return_value=iter([mock_page]))
         mock_doc.close = MagicMock()
         mock_fitz.open.return_value = mock_doc
+        mock_fitz.__version__ = "1.23.0"
 
         result = extract_text_adaptive(b"%PDF fake", "print-locked.pdf", ocr_fn)
 
