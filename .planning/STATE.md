@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 3
+current_plan: 3 (Wave 2)
 status: Executing Phase 03
-stopped_at: Completed 03-01-PLAN.md and 03-02-PLAN.md (Wave 1)
-last_updated: "2026-04-06T19:00:00Z"
+stopped_at: Completed 03-03-PLAN.md — Phase 03 migration-and-backfill complete
+last_updated: "2026-04-06T19:01:47.059Z"
 progress:
   total_phases: 8
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 11
 ---
 
 # Project State
@@ -67,6 +67,8 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 03-01]: document_id=None for all manual entry migrations — no source document; started_at/ended_at dropped as patient_medications has no date-range columns
 - [Phase 03-02]: Backfill script is intentionally thin — delegates all logic to list_by_user() and promote_to_patient_tables() without reimplementation
 - [Phase 03-02]: Error counting per-doc so one failure does not abort the entire backfill; dry_run increments promoted counter for preview accuracy
+- [Phase 03-03]: User-id auto-discovered from health_entries table using service role key — no need to ask user for UUID
+- [Phase 03-03]: patient_observations=0 is correct — all 3 structured_lab docs had empty observations[] arrays due to pre-Phase-1 OCR degradation; not a migration bug
 
 ## Performance Metrics
 
@@ -82,10 +84,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 02 P03 | 1min | 2 tasks | 1 files |
 | 03 | 01 | 2min | 1 | 3 |
 | 03 | 02 | 1min | 1 | 3 |
+| Phase 03 P03 | 5min | 2 tasks | 0 files |
 
 ## Last Session
 
-**Stopped at:** Completed Wave 1 (03-01 + 03-02 in parallel)
+**Stopped at:** Completed 03-03-PLAN.md — Phase 03 migration-and-backfill complete
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context
