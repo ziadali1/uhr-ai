@@ -35,9 +35,11 @@ A patient's complete medical history — reliably extracted, reliably retrievabl
 
 **Milestone 2 — Structured Data Foundation**
 
-- [ ] Longitudinal patient profile: aggregate structured data (labs, diagnoses, medications, symptoms) across documents over time
-- [ ] Cross-document entity linking: same lab test, same medication, same condition across multiple documents
-- [ ] Structured storage layer: a queryable patient timeline in Supabase, not just document blobs
+- [x] Longitudinal patient profile: aggregate structured data (labs, diagnoses, medications, symptoms) across documents over time — *Validated in Phase 2: longitudinal-patient-data-model*
+- [x] Cross-document entity linking: same lab test, same medication, same condition across multiple documents — *Validated in Phase 2*
+- [x] Structured storage layer: a queryable patient timeline in Supabase, not just document blobs — *Validated in Phase 2*
+- [x] Migration of existing manual health_entries into new patient tables — *Validated in Phase 3: migration-and-backfill*
+- [x] Backfill of existing documents' structured_result into new patient tables — *Validated in Phase 3*
 
 **Milestone 3 — Clinical Intelligence**
 
@@ -112,4 +114,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 after Phase 1 completion (adaptive-text-extraction)*
+*Last updated: 2026-04-06 after Phase 3 completion (migration-and-backfill)*
