@@ -85,7 +85,7 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 
 ## Last Session
 
-**Stopped at:** Completed Wave 1 (03-01 + 03-02)
+**Stopped at:** Completed Wave 1 (03-01 + 03-02 in parallel)
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context

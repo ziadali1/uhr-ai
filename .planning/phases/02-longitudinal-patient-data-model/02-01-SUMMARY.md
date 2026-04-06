@@ -105,6 +105,14 @@ Tests in Plan 02-03 mock the Supabase client so they run without the live DB.
 - `backend/models/patient.py` is importable — Plan 02-02 (`patient_store.py`) can import `PatientObservation`, `PatientCondition`, `PatientMedication`, `PatientAllergy`, `PatientImagingFinding` immediately
 - No blockers for Plan 02-02 execution
 
+## Self-Check: PASSED
+
+- FOUND: supabase/migrations/20260405000000_patient_tables.sql
+- FOUND: backend/models/patient.py
+- FOUND: 02-01-SUMMARY.md
+- FOUND commit: e4d0082 (Task 1)
+- FOUND commit: 184f438 (Task 2)
+
 ---
 *Phase: 02-longitudinal-patient-data-model*
 *Completed: 2026-04-06*
