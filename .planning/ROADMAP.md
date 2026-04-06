@@ -85,13 +85,15 @@ Plans:
 
 **Requirements:** RETRIEVE-01, RETRIEVE-02, RETRIEVE-03
 
-**Plans:**
-1. Verify Azure AI Search tier supports vector fields (upgrade to Standard if on Basic); document tier requirement
-2. Extend index schema: add `content_vector` (1536-dim HNSW cosine), `document_family`, `collection_date`, `document_subtype` filterable fields, semantic configuration
-3. Implement `services/azure/embeddings.py`: generate embeddings from structured context blocks (not raw text) using Azure OpenAI or Anthropic embeddings
-4. Update `services/rag/indexer.py`: generate and store embedding on every new document upload
-5. Update `services/rag/retriever.py`: replace BM25 with `VectorizedQuery` + `search_text` hybrid query with RRF fusion
-6. Re-index all existing documents with new schema and embeddings
+**Plans:** 6 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Wave 0 test stubs + Azure tier verification (RETRIEVE-01, RETRIEVE-02, RETRIEVE-03)
+- [ ] 04-02-PLAN.md — Index schema extension: content_vector, filterable metadata, semantic config (RETRIEVE-01)
+- [ ] 04-03-PLAN.md — Embeddings service: context_block.py + embeddings.py (RETRIEVE-02)
+- [ ] 04-04-PLAN.md — Indexer update: context block assembly + embedding in upload pipeline (RETRIEVE-02)
+- [ ] 04-05-PLAN.md — Retriever update: hybrid VectorizedQuery + semantic reranking (RETRIEVE-03)
+- [ ] 04-06-PLAN.md — Re-index script + execution: migrate all documents to hybrid index (RETRIEVE-01, RETRIEVE-02, RETRIEVE-03)
 
 **Done when:**
 - Hybrid query returns more relevant results than BM25 on 10 sample clinical queries
@@ -221,3 +223,4 @@ Phase 8 (Security) ── independent, can run in parallel with Phase 4-6
 *Phase 1 plans created: 2026-04-02*
 *Phase 2 plans created: 2026-04-05*
 *Phase 3 plans created: 2026-04-06*
+*Phase 4 plans created: 2026-04-06*
