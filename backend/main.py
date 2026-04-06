@@ -6,6 +6,9 @@ Para rodar localmente:
 
 Documentação interativa: http://localhost:8000/docs
 """
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
