@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 2
 status: Executing Phase 02
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-04-06T12:37:00Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-04-06T12:42:45.251Z"
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 ## Current Phase
 
-**Phase 2: Longitudinal Patient Data Model** — In progress (Plan 1/3 complete)
+**Phase 2: Longitudinal Patient Data Model** — In progress (Plan 2/3 complete)
 
-Current Plan: 2
-Next: 02-02-patient-store
+Current Plan: 3
+Next: 02-03-upload-integration
 
 ## Milestone
 
@@ -59,6 +59,9 @@ Next: 02-02-patient-store
 - [Phase 02-01]: patient_observations uses non-unique index idx_obs_dedup (not a UNIQUE constraint) to allow storing both conflicting rows per D-01; application code in patient_store.py handles conflict detection
 - [Phase 02-01]: analyte_aliases seeded with 25 rows including both accented and unaccented Brazilian lab term variants for robust alias lookup
 - [Phase 02-01]: user_id stored as TEXT across all patient tables to match existing documents table pattern
+- [Phase 02-02]: Observation pre-check uses SELECT then conditional INSERT (not upsert) so both conflicting rows coexist per D-01
+- [Phase 02-02]: _load_aliases wrapped in try/except returning {} for graceful degradation in dev without analyte_aliases table
+- [Phase 02-02]: Brazilian date falls back to upload_date (not None) to ensure concrete observed_date for dedup key — NULL != NULL in SQL
 
 ## Performance Metrics
 
@@ -70,10 +73,11 @@ Next: 02-02-patient-store
 | 01 | 04 | 3min | 2 | 5 |
 | 01 | 05 | 8min | 2 | 6 |
 | 02 | 01 | 4min | 2 | 2 |
+| Phase 02 P02 | 5min | 2 tasks | 3 files |
 
 ## Last Session
 
-**Stopped at:** Completed 02-01-PLAN.md
+**Stopped at:** Completed 02-02-PLAN.md
 **Timestamp:** 2026-04-06T12:37:00Z
 
 ## Key Context
