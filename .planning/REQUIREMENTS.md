@@ -16,7 +16,7 @@
 
 ### Patient Data Model
 
-- [ ] **STORE-01**: System has 5 queryable Postgres tables for longitudinal patient data: `patient_observations`, `patient_conditions`, `patient_medications`, `patient_allergies`, `patient_imaging_findings`
+- [x] **STORE-01**: System has 5 queryable Postgres tables for longitudinal patient data: `patient_observations`, `patient_conditions`, `patient_medications`, `patient_allergies`, `patient_imaging_findings`
 - [ ] **STORE-02**: System promotes structured extraction results into patient tables after every document upload
 - [ ] **STORE-03**: System deduplicates patient entities across documents using tiered strategy (LOINC → alias table → fuzzy → flag for review)
 - [ ] **STORE-04**: System migrates existing manual `health_entries` records into new patient tables without data loss
@@ -91,7 +91,7 @@
 | INGEST-04 | Phase 1 | Complete |
 | INGEST-05 | Phase 1 | Complete |
 | INGEST-06 | Phase 1 | Complete |
-| STORE-01 | Phase 2 | Pending |
+| STORE-01 | Phase 2 | Complete |
 | STORE-02 | Phase 2 | Pending |
 | STORE-03 | Phase 2 | Pending |
 | STORE-04 | Phase 3 | Pending |
