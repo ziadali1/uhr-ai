@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 3
-status: Executing Phase 02
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-04-06T12:46:28.406Z"
+current_plan: 1
+status: Executing Phase 03
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-04-06T18:53:00Z"
 progress:
   total_phases: 8
   completed_phases: 2
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 11
+  completed_plans: 9
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** A patient's complete medical history — reliably extracted, reliably retrievable, and intelligently reasoned over.
-**Current focus:** Phase 02 — longitudinal-patient-data-model
+**Current focus:** Phase 03 — migration-and-backfill
 
 ## Current Phase
 
-**Phase 2: Longitudinal Patient Data Model** — Complete (3/3 plans done)
+**Phase 3: Migration and Backfill** — In progress (1/3 plans done)
 
-Current Plan: 3 (complete)
-Next: Phase 03
+Current Plan: 1 (complete)
+Next: 03-02
 
 ## Milestone
 
@@ -63,6 +63,8 @@ Next: Phase 03
 - [Phase 02-02]: _load_aliases wrapped in try/except returning {} for graceful degradation in dev without analyte_aliases table
 - [Phase 02-02]: Brazilian date falls back to upload_date (not None) to ensure concrete observed_date for dedup key — NULL != NULL in SQL
 - [Phase 02-03]: Double try/except for promotion (outer in upload.py + inner in patient_store.py) is intentional defense-in-depth per D-07: upload always succeeds even if promotion has bugs
+- [Phase 03-01]: Direct health_entries table query (not health_store.list_by_user) to include active=False entries — zero data loss
+- [Phase 03-01]: document_id=None for all manual entry migrations — no source document; started_at/ended_at dropped as patient_medications has no date-range columns
 
 ## Performance Metrics
 
@@ -76,11 +78,12 @@ Next: Phase 03
 | 02 | 01 | 4min | 2 | 2 |
 | Phase 02 P02 | 5min | 2 tasks | 3 files |
 | Phase 02 P03 | 1min | 2 tasks | 1 files |
+| 03 | 01 | 2min | 1 | 3 |
 
 ## Last Session
 
-**Stopped at:** Completed 02-03-PLAN.md
-**Timestamp:** 2026-04-06T12:37:00Z
+**Stopped at:** Completed 03-01-PLAN.md
+**Timestamp:** 2026-04-06T18:53:00Z
 
 ## Key Context
 

@@ -60,7 +60,7 @@ Plans:
 
 **Requirements:** STORE-04, STORE-05
 
-**Plans:** 3 plans
+**Plans:** 0/3 plans executed
 
 Plans:
 - [ ] 03-01-PLAN.md — Create migrate_health_entries.py: map health_entries to patient tables with dry-run and unit tests (STORE-04)
