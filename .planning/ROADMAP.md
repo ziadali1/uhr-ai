@@ -60,11 +60,11 @@ Plans:
 
 **Requirements:** STORE-04, STORE-05
 
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 
 Plans:
-- [ ] 03-01-PLAN.md — Create migrate_health_entries.py: map health_entries to patient tables with dry-run and unit tests (STORE-04)
-- [ ] 03-02-PLAN.md — Create backfill_patient_tables.py: iterate documents, promote structured_result with dry-run and unit tests (STORE-05)
+- [x] 03-01-PLAN.md — Create migrate_health_entries.py: map health_entries to patient tables with dry-run and unit tests (STORE-04)
+- [x] 03-02-PLAN.md — Create backfill_patient_tables.py: iterate documents, promote structured_result with dry-run and unit tests (STORE-05)
 - [ ] 03-03-PLAN.md — Run both scripts against live DB, verify completeness, confirm idempotency (STORE-04, STORE-05)
 
 **Done when:**

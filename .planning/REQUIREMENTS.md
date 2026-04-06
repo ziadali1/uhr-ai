@@ -20,7 +20,7 @@
 - [x] **STORE-02**: System promotes structured extraction results into patient tables after every document upload
 - [x] **STORE-03**: System deduplicates patient entities across documents using tiered strategy (LOINC → alias table → fuzzy → flag for review)
 - [ ] **STORE-04**: System migrates existing manual `health_entries` records into new patient tables without data loss
-- [ ] **STORE-05**: System backfills existing documents' `structured_result` JSONB into new patient tables
+- [x] **STORE-05**: System backfills existing documents' `structured_result` JSONB into new patient tables
 
 ### Retrieval
 
@@ -95,7 +95,7 @@
 | STORE-02 | Phase 2 | Complete |
 | STORE-03 | Phase 2 | Complete |
 | STORE-04 | Phase 3 | Pending |
-| STORE-05 | Phase 3 | Pending |
+| STORE-05 | Phase 3 | Complete |
 | RETRIEVE-01 | Phase 4 | Pending |
 | RETRIEVE-02 | Phase 4 | Pending |
 | RETRIEVE-03 | Phase 4 | Pending |
