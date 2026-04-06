@@ -39,7 +39,7 @@ Plans:
 
 **Requirements:** STORE-01, STORE-02, STORE-03
 
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans executed
 
 Plans:
 - [x] 02-01-PLAN.md — Create 6 Postgres tables (5 patient + analyte_aliases) via Supabase migration with seed data; Pydantic models
@@ -60,11 +60,12 @@ Plans:
 
 **Requirements:** STORE-04, STORE-05
 
-**Plans:**
-1. Write `scripts/migrate_health_entries.py`: map existing `health_entries` records to new patient tables (medications → `patient_medications`, allergies → `patient_allergies`, complaints → `patient_conditions`)
-2. Write `scripts/backfill_patient_tables.py`: iterate all existing documents, re-parse `structured_result` JSONB, promote into patient tables
-3. Add backfill dry-run mode (reports what would be created without writing) and idempotent re-run support
-4. Verify backfill completeness: query counts before/after, spot-check specific documents
+**Plans:** 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Create migrate_health_entries.py: map health_entries to patient tables with dry-run and unit tests (STORE-04)
+- [ ] 03-02-PLAN.md — Create backfill_patient_tables.py: iterate documents, promote structured_result with dry-run and unit tests (STORE-05)
+- [ ] 03-03-PLAN.md — Run both scripts against live DB, verify completeness, confirm idempotency (STORE-04, STORE-05)
 
 **Done when:**
 - All existing `health_entries` migrated with no data loss
@@ -219,3 +220,4 @@ Phase 8 (Security) ── independent, can run in parallel with Phase 4-6
 *Roadmap created: 2026-04-04*
 *Phase 1 plans created: 2026-04-02*
 *Phase 2 plans created: 2026-04-05*
+*Phase 3 plans created: 2026-04-06*
