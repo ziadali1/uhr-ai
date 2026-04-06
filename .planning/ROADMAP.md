@@ -44,7 +44,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md — Create 6 Postgres tables (5 patient + analyte_aliases) via Supabase migration with seed data; Pydantic models
 - [x] 02-02-PLAN.md — Implement patient_store.py promotion functions per document family with dedup, alias lookup, conflict detection; unit tests
-- [ ] 02-03-PLAN.md — Wire promotion into upload pipeline after store_save; end-to-end verification
+- [x] 02-03-PLAN.md — Wire promotion into upload pipeline after store_save; end-to-end verification
 
 **Done when:**
 - Upload of a lab PDF creates rows in `patient_observations`

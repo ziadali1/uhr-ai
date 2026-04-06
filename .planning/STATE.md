@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 2
+current_plan: 3
 status: Executing Phase 02
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-04-06T12:42:45.251Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-04-06T12:46:28.406Z"
 progress:
   total_phases: 8
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 ## Current Phase
 
-**Phase 2: Longitudinal Patient Data Model** — In progress (Plan 2/3 complete)
+**Phase 2: Longitudinal Patient Data Model** — Complete (3/3 plans done)
 
-Current Plan: 3
-Next: 02-03-upload-integration
+Current Plan: 3 (complete)
+Next: Phase 03
 
 ## Milestone
 
@@ -38,7 +38,7 @@ Next: 02-03-upload-integration
 | Phase | Status | Completed |
 |-------|--------|-----------|
 | 01-adaptive-text-extraction | Complete | 2026-04-05 |
-| 02-longitudinal-patient-data-model | In progress | — |
+| 02-longitudinal-patient-data-model | Complete | 2026-04-06 |
 
 ## Decisions
 
@@ -62,6 +62,7 @@ Next: 02-03-upload-integration
 - [Phase 02-02]: Observation pre-check uses SELECT then conditional INSERT (not upsert) so both conflicting rows coexist per D-01
 - [Phase 02-02]: _load_aliases wrapped in try/except returning {} for graceful degradation in dev without analyte_aliases table
 - [Phase 02-02]: Brazilian date falls back to upload_date (not None) to ensure concrete observed_date for dedup key — NULL != NULL in SQL
+- [Phase 02-03]: Double try/except for promotion (outer in upload.py + inner in patient_store.py) is intentional defense-in-depth per D-07: upload always succeeds even if promotion has bugs
 
 ## Performance Metrics
 
@@ -74,10 +75,11 @@ Next: 02-03-upload-integration
 | 01 | 05 | 8min | 2 | 6 |
 | 02 | 01 | 4min | 2 | 2 |
 | Phase 02 P02 | 5min | 2 tasks | 3 files |
+| Phase 02 P03 | 1min | 2 tasks | 1 files |
 
 ## Last Session
 
-**Stopped at:** Completed 02-02-PLAN.md
+**Stopped at:** Completed 02-03-PLAN.md
 **Timestamp:** 2026-04-06T12:37:00Z
 
 ## Key Context
