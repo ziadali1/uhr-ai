@@ -10,9 +10,12 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
-from models.document import DocumentDetail, UploadResponse
+from models.document import DocumentDetail, ExtractionMeta, UploadResponse
 from services.azure.blob_storage import upload_blob
+from services.azure.document_intelligence import extract_text_with_meta
 from services.document_store import save as store_save
+from services.extraction.router import PasswordProtectedError
+from services.patient_store import promote_to_patient_tables
 from services.pipeline import orchestrator
 from services.rag.indexer import index_after_upload
 from utils.auth import get_current_user
@@ -87,7 +90,19 @@ async def upload_document(
             entities=result.entities,
         )
 
-        # 5. Persist to Supabase
+        # 5. Build ExtractionMeta from pipeline result
+        extraction_meta: ExtractionMeta | None = None
+        if result.extraction_result is not None:
+            extraction_meta = ExtractionMeta(
+                method=result.extraction_result["method"],
+                quality_score=result.extraction_result["quality_score"],
+                page_strategies=result.extraction_result["page_strategies"],
+                library=result.extraction_result["library"],
+                fallback_reason=result.extraction_result["fallback_reason"],
+                extracted_at=datetime.now(timezone.utc).isoformat(),
+            )
+
+        # 6. Persist to Supabase
         store_save(DocumentDetail(
             document_id=doc_id,
             user_id=user_id,
@@ -98,8 +113,28 @@ async def upload_document(
             pii_substitutions=[],
             structured_result=result.structured_result,
             file_blob_url=file_blob_url,
+            text_extraction_meta=extraction_meta,
         ))
 
+        # 7. Promote structured data to patient tables (soft-fail per D-04/D-07)
+        try:
+            promote_to_patient_tables(
+                doc_id=doc_id,
+                user_id=user_id,
+                structured_result=result.structured_result,
+                upload_date=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            )
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).warning(
+                "patient_store promotion failed doc_id=%s: %s", doc_id, exc
+            )
+
+    except PasswordProtectedError as e:
+        raise HTTPException(
+            status_code=422,
+            detail=f"PDF protegido por senha: {e}. Por favor, remova a proteção antes de fazer upload.",
+        )
     except HTTPException:
         raise
     except Exception as e:

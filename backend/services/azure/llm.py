@@ -1,15 +1,34 @@
 """
-LLM — Claude via Azure AI Foundry.
+LLM — GPT-4o mini via Azure OpenAI.
 
 Com USE_MOCK_AZURE=true, gera resposta simulada sem chamar a API.
 A resposta mock usa as fontes recuperadas para parecer realista.
 """
+import logging
 import os
 from collections.abc import Generator
+
+logger = logging.getLogger(__name__)
 
 
 def _use_mock() -> bool:
     return os.getenv("USE_MOCK_AZURE", "true").lower() == "true"
+
+
+def _get_client():
+    from openai import OpenAI
+
+    base_url = os.environ["AZURE_OPENAI_BASE_URL"]
+    api_key = os.environ["AZURE_OPENAI_API_KEY"]
+
+    return OpenAI(
+        base_url=base_url,
+        api_key=api_key,
+    )
+
+
+def _get_chat_deployment() -> str:
+    return os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-4o-mini")
 
 
 def chat_stream(
@@ -18,7 +37,7 @@ def chat_stream(
     sources: list[str],
 ) -> Generator[str, None, None]:
     """
-    Envia mensagens ao Claude e retorna um generator de chunks de texto (streaming).
+    Envia mensagens ao Azure OpenAI e retorna um generator de chunks de texto (streaming).
 
     Args:
         system_prompt: prompt de sistema com contexto RAG injetado
@@ -29,22 +48,66 @@ def chat_stream(
         yield from _mock_stream(messages, sources)
         return
 
-    import anthropic
+    client = _get_client()
+    deployment = _get_chat_deployment()
 
-    client = anthropic.Anthropic(
-        base_url=os.environ["ANTHROPIC_BASE_URL"],
-        api_key=os.environ["ANTHROPIC_API_KEY"],
-        default_headers={"api-key": os.environ["ANTHROPIC_API_KEY"]},
-    )
+    try:
+        stream = client.chat.completions.create(
+            model=deployment,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                *messages,
+            ],
+            max_tokens=1024,
+            temperature=0.2,
+            stream=True,
+        )
 
-    with client.messages.stream(
-        model="claude-sonnet-4-5",
-        max_tokens=1024,
-        system=system_prompt,
-        messages=messages,
-    ) as stream:
-        for text in stream.text_stream:
-            yield text
+        for chunk in stream:
+            if not chunk.choices:
+                continue
+
+            delta = chunk.choices[0].delta
+            if delta and getattr(delta, "content", None):
+                yield delta.content
+
+    except Exception:
+        logger.exception("OpenAI streaming call failed")
+        raise
+
+
+def generate_json(system: str, user: str) -> str:
+    """
+    Single-turn call for structured JSON extraction.
+    Returns raw response string (caller parses JSON).
+    """
+    if _use_mock():
+        return "{}"
+
+    if len(user) > 12000:
+        user = user[:12000] + "\n\n[texto truncado]"
+
+    client = _get_client()
+    deployment = _get_chat_deployment()
+
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            max_tokens=4096,
+            temperature=0,
+            response_format={"type": "json_object"},
+        )
+
+        content = response.choices[0].message.content
+        return content if content else "{}"
+
+    except Exception:
+        logger.exception("OpenAI JSON call failed")
+        raise
 
 
 def _mock_stream(messages: list[dict], sources: list[str]) -> Generator[str, None, None]:
@@ -61,39 +124,13 @@ def _mock_stream(messages: list[dict], sources: list[str]) -> Generator[str, Non
     if sources:
         source_ref = f"\n\n📎 Fonte: {', '.join(sources)}"
 
-    # Respostas mock por palavras-chave
     response = _build_mock_response(last_user_msg, sources)
     full_response = response + source_ref
 
-    # Simula streaming palavra por palavra
     words = full_response.split(" ")
     for i, word in enumerate(words):
         yield word + (" " if i < len(words) - 1 else "")
         time.sleep(0.03)
-
-
-def generate_json(system: str, user: str) -> str:
-    """
-    Single-turn Claude call for structured JSON extraction.
-    Returns raw response string (caller parses JSON).
-    """
-    if _use_mock():
-        return "{}"
-
-    import anthropic
-
-    client = anthropic.Anthropic(
-        base_url=os.environ["ANTHROPIC_BASE_URL"],
-        api_key=os.environ["ANTHROPIC_API_KEY"],
-        default_headers={"api-key": os.environ["ANTHROPIC_API_KEY"]},
-    )
-    response = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=2048,
-        system=system,
-        messages=[{"role": "user", "content": user}],
-    )
-    return response.content[0].text
 
 
 def _build_mock_response(question: str, sources: list[str]) -> str:
@@ -138,8 +175,8 @@ def _build_mock_response(question: str, sources: list[str]) -> str:
         return "O tipo sanguíneo registrado nos documentos é **A positivo (A+)**."
 
     return (
-        f"Com base nos documentos analisados, encontrei informações relevantes para sua pergunta. "
-        f"Os registros indicam que o [PACIENTE] possui histórico de Diabetes tipo 2 e Fibrilação atrial, "
-        f"em uso de Metformina e Warfarina, com alergias a Dipirona e Penicilina. "
-        f"Para uma resposta mais precisa, reformule sua pergunta com mais detalhes."
+        "Com base nos documentos analisados, encontrei informações relevantes para sua pergunta. "
+        "Os registros indicam que o [PACIENTE] possui histórico de Diabetes tipo 2 e Fibrilação atrial, "
+        "em uso de Metformina e Warfarina, com alergias a Dipirona e Penicilina. "
+        "Para uma resposta mais precisa, reformule sua pergunta com mais detalhes."
     )

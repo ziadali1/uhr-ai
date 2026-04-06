@@ -10,7 +10,7 @@ import os
 from datetime import datetime, timezone
 
 from supabase import create_client, Client
-from models.document import DocumentDetail, ExtractedEntity, StructuredResult
+from models.document import DocumentDetail, ExtractedEntity, StructuredResult, ExtractionMeta
 
 _client: Client | None = None
 
@@ -39,6 +39,12 @@ def save(detail: DocumentDetail) -> None:
     }
     if detail.structured_result is not None:
         row["structured_result"] = detail.structured_result.model_dump()
+    try:
+        # Column added in Phase 1 migration — see .planning/phases/01-adaptive-text-extraction/
+        if detail.text_extraction_meta is not None:
+            row["text_extraction_meta"] = detail.text_extraction_meta.model_dump()
+    except Exception:
+        pass  # column may not exist yet; migration required
     client.table("documents").insert(row).execute()
 
 
@@ -77,6 +83,13 @@ def _row_to_detail(row: dict) -> DocumentDetail:
         except Exception:
             pass
 
+    text_extraction_meta = None
+    if row.get("text_extraction_meta"):
+        try:
+            text_extraction_meta = ExtractionMeta(**row["text_extraction_meta"])
+        except Exception:
+            pass
+
     return DocumentDetail(
         document_id=row["id"],
         user_id=row["user_id"],
@@ -87,4 +100,5 @@ def _row_to_detail(row: dict) -> DocumentDetail:
         pii_substitutions=row["pii_substitutions"] or [],
         structured_result=structured_result,
         file_blob_url=row.get("file_blob_url"),
+        text_extraction_meta=text_extraction_meta,
     )
