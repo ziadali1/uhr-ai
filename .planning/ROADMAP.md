@@ -85,12 +85,12 @@ Plans:
 
 **Requirements:** RETRIEVE-01, RETRIEVE-02, RETRIEVE-03
 
-**Plans:** 6 plans
+**Plans:** 2/6 plans executed
 
 Plans:
 - [ ] 04-01-PLAN.md — Wave 0 test stubs + Azure tier verification (RETRIEVE-01, RETRIEVE-02, RETRIEVE-03)
-- [ ] 04-02-PLAN.md — Index schema extension: content_vector, filterable metadata, semantic config (RETRIEVE-01)
-- [ ] 04-03-PLAN.md — Embeddings service: context_block.py + embeddings.py (RETRIEVE-02)
+- [x] 04-02-PLAN.md — Index schema extension: content_vector, filterable metadata, semantic config (RETRIEVE-01)
+- [x] 04-03-PLAN.md — Embeddings service: context_block.py + embeddings.py (RETRIEVE-02)
 - [ ] 04-04-PLAN.md — Indexer update: context block assembly + embedding in upload pipeline (RETRIEVE-02)
 - [ ] 04-05-PLAN.md — Retriever update: hybrid VectorizedQuery + semantic reranking (RETRIEVE-03)
 - [ ] 04-06-PLAN.md — Re-index script + execution: migrate all documents to hybrid index (RETRIEVE-01, RETRIEVE-02, RETRIEVE-03)

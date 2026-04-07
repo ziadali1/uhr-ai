@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: Not started
-status: Ready to plan
-stopped_at: Completed 03-03-PLAN.md — Phase 03 migration-and-backfill complete
-last_updated: "2026-04-06T19:12:10.543Z"
+current_plan: 1
+status: Executing Phase 04
+stopped_at: Completed 04-03-PLAN.md — context_block.py and embeddings.py implemented
+last_updated: "2026-04-07T10:08:14.090Z"
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 17
+  completed_plans: 13
 ---
 
 # Project State
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** A patient's complete medical history — reliably extracted, reliably retrievable, and intelligently reasoned over.
-**Current focus:** Phase 03 — migration-and-backfill
+**Current focus:** Phase 04 — hybrid-search-index
 
 ## Current Phase
 
 **Phase 3: Migration and Backfill** — In progress (2/3 plans done)
 
-Current Plan: Not started
+Current Plan: 1
 Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and tested)
 
 ## Milestone
@@ -69,6 +69,12 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 03-02]: Error counting per-doc so one failure does not abort the entire backfill; dry_run increments promoted counter for preview accuracy
 - [Phase 03-03]: User-id auto-discovered from health_entries table using service role key — no need to ask user for UUID
 - [Phase 03-03]: patient_observations=0 is correct — all 3 structured_lab docs had empty observations[] arrays due to pre-Phase-1 OCR degradation; not a migration bug
+- [Phase 04-03]: conftest.py added at backend/ root for pytest sys.path setup
+- [Phase 04-03]: test files for context_block and embeddings created from scratch — no pre-existing Wave 0 stubs found
+- [Phase 04-02]: VECTOR_PROFILE_NAME and HNSW_CONFIG_NAME as module-level constants prevent profile name mismatch at runtime (Pitfall 1)
+- [Phase 04-02]: content_vector excluded from upload dict when None — Azure SDK serialization error on null vector (Pitfall 2)
+- [Phase 04-02]: search() function unchanged — BM25-only until Plan 05 adds hybrid retrieval
+- [Phase 04-02]: index_document() backward-compatible — all new params default None, existing callers (indexer.py) unaffected
 
 ## Performance Metrics
 
@@ -85,10 +91,12 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | 03 | 01 | 2min | 1 | 3 |
 | 03 | 02 | 1min | 1 | 3 |
 | Phase 03 P03 | 5min | 2 tasks | 0 files |
+| Phase 04 P02 | 2min | 2 tasks | 2 files |
+| Phase 04 P03 | 2min | 2 tasks | 7 files |
 
 ## Last Session
 
-**Stopped at:** Completed 03-03-PLAN.md — Phase 03 migration-and-backfill complete
+**Stopped at:** Completed 04-03-PLAN.md — context_block.py and embeddings.py implemented
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context

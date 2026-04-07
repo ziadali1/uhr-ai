@@ -25,7 +25,7 @@
 ### Retrieval
 
 - [ ] **RETRIEVE-01**: Azure AI Search index includes vector fields (1536-dim, HNSW), filterable metadata (`document_family`, `collection_date`, `document_subtype`), and semantic configuration
-- [ ] **RETRIEVE-02**: System generates embeddings from structured context blocks (not raw text) on each document upload
+- [x] **RETRIEVE-02**: System generates embeddings from structured context blocks (not raw text) on each document upload
 - [ ] **RETRIEVE-03**: Chat retrieval uses hybrid search (vector + keyword + RRF) instead of BM25-only
 - [ ] **RETRIEVE-04**: System classifies query intent and routes numeric/aggregation queries to Supabase SQL, narrative queries to Azure AI Search
 - [ ] **RETRIEVE-05**: Context injected into Claude uses structured entity blocks (lab values, flags, summaries) not 500-char raw text truncations
@@ -97,7 +97,7 @@
 | STORE-04 | Phase 3 | Complete |
 | STORE-05 | Phase 3 | Complete |
 | RETRIEVE-01 | Phase 4 | Pending |
-| RETRIEVE-02 | Phase 4 | Pending |
+| RETRIEVE-02 | Phase 4 | Complete |
 | RETRIEVE-03 | Phase 4 | Pending |
 | RETRIEVE-04 | Phase 5 | Pending |
 | RETRIEVE-05 | Phase 5 | Pending |
