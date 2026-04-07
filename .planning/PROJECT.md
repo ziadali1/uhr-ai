@@ -16,7 +16,7 @@ A patient's complete medical history — reliably extracted, reliably retrievabl
 - ✓ OCR-based text extraction via Azure Document Intelligence — existing
 - ✓ Document classification into families (lab, imaging, clinical, medication, unknown) — existing
 - ✓ Structured data extraction via LLM (Claude) per document family — existing
-- ✓ RAG indexing in Azure AI Search after upload — existing
+- ✓ RAG indexing in Supabase pgvector (search_index) after upload — migrated from Azure AI Search in Phase 4
 - ✓ Chat agent with document retrieval (top-k, SSE streaming) — existing
 - ✓ Manual health profile entries (medications, allergies, complaints) — existing
 - ✓ Emergency QR profile (medications, allergies, complaints accessible by UUID) — existing
@@ -45,7 +45,7 @@ A patient's complete medical history — reliably extracted, reliably retrievabl
 
 - [ ] Complex query support: trends over time, value ranges, comparisons across visits
 - [ ] Clinical reasoning: case summary, relevant findings, differential diagnosis suggestions with evidence and uncertainty
-- [ ] Hybrid retrieval: structured + semantic search combined for chat agent responses
+- [x] Hybrid retrieval: pgvector (cosine) + full-text RRF search via Supabase — *Validated in Phase 4: hybrid-search-index*
 
 ### Out of Scope
 
@@ -59,14 +59,14 @@ A patient's complete medical history — reliably extracted, reliably retrievabl
 
 **Current state (brownfield):**
 - FastAPI backend (Python) + Next.js 14 frontend (TypeScript, static export)
-- Azure services: Document Intelligence (OCR), AI Search (RAG), Blob Storage, Text Analytics, OpenAI-compatible LLM endpoint
+- Azure services: Document Intelligence (OCR), Blob Storage, Text Analytics, OpenAI (embeddings + LLM endpoint) — Azure AI Search replaced by Supabase pgvector
 - Anthropic Claude as LLM for structured extraction and chat
 - Supabase for auth + database
 - Deployed: backend as Azure Functions, frontend as Azure Static Web Apps
 
 **Critical known issues (from codebase audit):**
 - Pipeline always runs OCR even for native-text PDFs — degrades text quality significantly
-- RAG uses basic keyword/full-text search only — retrieval fails on many valid queries
+- RAG uses pgvector hybrid search (vector + FTS via RRF) — requires AZURE_OPENAI_EMBEDDING_DEPLOYMENT to be set for vectors to be generated
 - Anonymizer pipeline exists but is never called during upload — PII stored in plaintext
 - Emergency profile endpoint (`GET /emergency/{user_id}`) has no auth — exposes full PHI
 - `USE_MOCK_AZURE=true` is the default — bypasses all auth if misconfigured in production
@@ -114,4 +114,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-06 after Phase 3 completion (migration-and-backfill)*
+*Last updated: 2026-04-07 after Phase 4 completion (hybrid-search-index)*
