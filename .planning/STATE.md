@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: Executing Phase 04
-stopped_at: Completed 04-02 — Supabase pgvector search index migration and search.py rewrite
-last_updated: "2026-04-07T19:35:25.916Z"
+stopped_at: Completed 04-05 — Retriever query embedding for hybrid search
+last_updated: "2026-04-07T19:39:14.720Z"
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 17
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State
@@ -80,6 +80,7 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 04-02]: content_vector excluded from upsert row when None — pgvector rejects null vector serialization
 - [Phase 04-02]: fts_search RPC added as fallback when no query_vector provided — single SQL code path for both modes
 - [Phase 04-02]: search() signature extended with optional query_vector param — backward-compatible, all existing callers unaffected
+- [Phase 04-05]: query_vector always passed to search() — None triggers fts_search fallback, non-None triggers hybrid_search RPC
 
 ## Performance Metrics
 
@@ -100,10 +101,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 04 P03 | 2min | 2 tasks | 7 files |
 | Phase 04 P01 | 2min | 1 tasks | 7 files |
 | Phase 04 P02 | 5min | 2 tasks | 3 files |
+| Phase 04 P05 | 68s | 1 tasks | 2 files |
 
 ## Last Session
 
-**Stopped at:** Completed 04-02 — Supabase pgvector search index migration and search.py rewrite
+**Stopped at:** Completed 04-05 — Retriever query embedding for hybrid search
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context
