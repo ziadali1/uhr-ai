@@ -88,6 +88,7 @@ async def upload_document(
             anonymized_text=result.raw_text,
             source_name=file.filename or "document",
             entities=result.entities,
+            structured_result=result.structured_result,
         )
 
         # 5. Build ExtractionMeta from pipeline result
