@@ -27,6 +27,10 @@ class IndexedDocument:
     text: str
     source_name: str
     entities: list[str] = field(default_factory=list)
+    content_vector: list[float] | None = None       # NEW: 1536-dim embedding
+    document_family: str | None = None               # NEW: filterable
+    collection_date: str | None = None               # NEW: filterable ISO date
+    document_subtype: str | None = None              # NEW: filterable, nullable
 
 
 @dataclass
@@ -47,6 +51,10 @@ def index_document(
     text: str,
     source_name: str,
     entities: list[str],
+    content_vector: list[float] | None = None,
+    document_family: str | None = None,
+    collection_date: str | None = None,
+    document_subtype: str | None = None,
 ) -> None:
     """Indexa um documento no Azure AI Search (ou mock em memória)."""
     if _use_mock():
@@ -59,6 +67,10 @@ def index_document(
             text=text,
             source_name=source_name,
             entities=entities,
+            content_vector=content_vector,
+            document_family=document_family,
+            collection_date=collection_date,
+            document_subtype=document_subtype,
         ))
         return
 
@@ -70,13 +82,25 @@ def index_document(
     index_name = os.environ.get("SEARCH_INDEX_NAME", "uhr-health-records")
 
     client = SearchClient(endpoint, index_name, AzureKeyCredential(key))
-    client.upload_documents(documents=[{
+
+    doc = {
         "id": doc_id,
         "user_id": user_id,
         "content": text,
         "source_name": source_name,
         "entities": ", ".join(entities),
-    }])
+    }
+    # CRITICAL: Do NOT include content_vector when None — causes serialization error (Pitfall 2)
+    if content_vector:
+        doc["content_vector"] = content_vector
+    if document_family:
+        doc["document_family"] = document_family
+    if collection_date:
+        doc["collection_date"] = collection_date
+    if document_subtype:
+        doc["document_subtype"] = document_subtype
+
+    client.upload_documents(documents=[doc])
 
 
 def search(query: str, user_id: str, top_k: int = 3) -> list[SearchResult]:
@@ -157,5 +181,3 @@ def _extract_excerpt(text: str, query_words: set[str], max_len: int = 400) -> st
             best_pos = max(0, pos - 100)
             break
     return text[best_pos: best_pos + max_len].strip()
-
-
