@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: Executing Phase 04
-stopped_at: Completed 04-04 — Indexer context block assembly + embedding wiring
-last_updated: "2026-04-07T19:41:12.111Z"
+stopped_at: Completed 04-06 — Re-index documents script
+last_updated: "2026-04-07T19:45:12.847Z"
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 17
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # Project State
@@ -83,6 +83,8 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 04-05]: query_vector always passed to search() — None triggers fts_search fallback, non-None triggers hybrid_search RPC
 - [Phase 04-04]: structured_result defaults to None in index_after_upload — backward-compatible with all existing callers
 - [Phase 04-04]: collection_date extracted from structured_data dict, not top-level StructuredResult field — matches existing data shape
+- [Phase 04-06]: Script truncates search_index via delete().neq('id','') — Supabase REST lacks TRUNCATE
+- [Phase 04-06]: content_vector passed as-is (None) to index_document which already guards against null vector serialization
 
 ## Performance Metrics
 
@@ -105,10 +107,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 04 P02 | 5min | 2 tasks | 3 files |
 | Phase 04 P05 | 68s | 1 tasks | 2 files |
 | Phase 04 P04 | 2min | 2 tasks | 3 files |
+| Phase 04 P06 | 3min | 1 tasks | 1 files |
 
 ## Last Session
 
-**Stopped at:** Completed 04-04 — Indexer context block assembly + embedding wiring
+**Stopped at:** Completed 04-06 — Re-index documents script
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context
