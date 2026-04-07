@@ -2,6 +2,7 @@
 RAG Retriever — busca documentos relevantes e monta o prompt para o LLM.
 """
 from services.azure.search import search, SearchResult
+from services.azure.embeddings import generate_embedding
 
 SYSTEM_PROMPT = """Você é um assistente médico de suporte ao paciente.
 Seu papel é responder perguntas com base EXCLUSIVAMENTE nos documentos médicos fornecidos abaixo.
@@ -21,7 +22,9 @@ def build_context_prompt(question: str, user_id: str) -> tuple[str, list[str]]:
         system_prompt: prompt de sistema com contexto do paciente injetado
         sources: lista de nomes de documentos usados como fonte
     """
-    results: list[SearchResult] = search(question, user_id, top_k=3)
+    # Embed query for hybrid search (D-22). None falls back to full-text search.
+    query_vector = generate_embedding(question)
+    results: list[SearchResult] = search(question, user_id, top_k=3, query_vector=query_vector)
 
     if not results:
         context_block = "Nenhum documento médico encontrado para este usuário."
