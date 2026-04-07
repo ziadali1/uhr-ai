@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: Executing Phase 04
-stopped_at: Completed 04-01 Task 1 — Wave 0 test stubs; paused at Task 2 checkpoint (Azure tier verification)
-last_updated: "2026-04-07T10:09:19.241Z"
+stopped_at: Completed 04-02 — Supabase pgvector search index migration and search.py rewrite
+last_updated: "2026-04-07T19:35:25.916Z"
 progress:
   total_phases: 8
   completed_phases: 3
@@ -77,6 +77,9 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 04-02]: index_document() backward-compatible — all new params default None, existing callers (indexer.py) unaffected
 - [Phase 04-01]: All Wave 0 stubs use @pytest.mark.skip (not xfail) — skip is cleaner for Wave 0 where the module under test does not yet exist
 - [Phase 04-01]: Imports placed inside Wave 0 test bodies — prevents ImportError from blocking pytest collection when modules do not yet exist
+- [Phase 04-02]: content_vector excluded from upsert row when None — pgvector rejects null vector serialization
+- [Phase 04-02]: fts_search RPC added as fallback when no query_vector provided — single SQL code path for both modes
+- [Phase 04-02]: search() signature extended with optional query_vector param — backward-compatible, all existing callers unaffected
 
 ## Performance Metrics
 
@@ -96,10 +99,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 04 P02 | 2min | 2 tasks | 2 files |
 | Phase 04 P03 | 2min | 2 tasks | 7 files |
 | Phase 04 P01 | 2min | 1 tasks | 7 files |
+| Phase 04 P02 | 5min | 2 tasks | 3 files |
 
 ## Last Session
 
-**Stopped at:** Completed 04-01 Task 1 — Wave 0 test stubs; paused at Task 2 checkpoint (Azure tier verification)
+**Stopped at:** Completed 04-02 — Supabase pgvector search index migration and search.py rewrite
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context

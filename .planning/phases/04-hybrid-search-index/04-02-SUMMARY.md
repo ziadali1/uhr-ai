@@ -1,105 +1,93 @@
 ---
 phase: 04-hybrid-search-index
-plan: 02
-subsystem: api
-tags: [azure-search, vector-search, hnsw, embeddings, semantic-search]
-
-# Dependency graph
-requires:
-  - phase: 03-migration-and-backfill
-    provides: existing documents stored in Supabase; RAG indexer pipeline wired in upload flow
-provides:
-  - Azure AI Search index schema with 1536-dim HNSW vector field and semantic configuration
-  - IndexedDocument dataclass extended with content_vector, document_family, collection_date, document_subtype
-  - index_document() backward-compatible signature accepting optional vector and metadata fields
-  - setup_azure_search.py drop+recreate script with --dry-run flag
-affects: [04-03-embeddings, 04-04-indexer-update, 04-05-hybrid-retriever, 04-06-reindex]
-
-# Tech tracking
-tech-stack:
-  added: []
-  patterns:
-    - Module-level constants (VECTOR_PROFILE_NAME, HNSW_CONFIG_NAME) prevent profile name mismatch in Azure SDK
-    - Conditional doc dict: only include content_vector key when non-None (prevents Azure serialization error)
-    - Drop+recreate pattern with delete_index() wrapped in try/except for graceful first-run
-
-key-files:
-  created: []
+plan: "02"
+subsystem: search
+tags: [pgvector, supabase, hybrid-search, rrf, sql-migration]
+dependency_graph:
+  requires: []
+  provides: [search_index table, hybrid_search RPC, fts_search RPC, supabase-backed search.py]
+  affects: [backend/services/azure/search.py, backend/scripts/migrations/001_create_search_index.sql]
+tech_stack:
+  added: [pgvector, supabase-py (rpc calls)]
+  patterns: [lazy singleton client, RRF fusion (vector + BM25), upsert pattern]
+key_files:
+  created:
+    - backend/scripts/migrations/001_create_search_index.sql
+    - backend/scripts/setup_search_index.py
   modified:
-    - backend/scripts/setup_azure_search.py
     - backend/services/azure/search.py
-
-key-decisions:
-  - "VECTOR_PROFILE_NAME and HNSW_CONFIG_NAME defined as module-level constants to prevent profile name mismatch at runtime (Pitfall 1)"
-  - "content_vector conditionally excluded from upload dict when None — Azure SDK serialization error on null vector (Pitfall 2)"
-  - "algorithm_configuration_name uses snake_case parameter name per SDK requirement (not camelCase)"
-  - "search() function left unchanged in this plan — BM25 only until Plan 05 adds hybrid retrieval"
-  - "index_document() signature backward-compatible — all new params default to None, existing callers (indexer.py) unaffected"
-
-patterns-established:
-  - "Pattern: Azure vector field setup uses named profile and algorithm constants to decouple name strings"
-  - "Pattern: Optional fields conditionally added to upload dict (not passed as None) for Azure AI Search compatibility"
-
-requirements-completed: [RETRIEVE-01]
-
-# Metrics
-duration: 2min
-completed: 2026-04-07
+decisions:
+  - content_vector excluded from upsert row when None — pgvector rejects null vector serialization
+  - fts_search RPC added as fallback when no query_vector provided — single SQL path for both modes
+  - Mock branch left unchanged — all existing tests continue to pass with USE_MOCK_AZURE=true
+  - search() signature extended with optional query_vector param — backward-compatible, all callers unaffected
+metrics:
+  duration: "5 min"
+  completed: "2026-04-07"
+  tasks_completed: 2
+  files_changed: 3
 ---
 
-# Phase 4 Plan 02: Hybrid Search Index Schema Summary
+# Phase 04 Plan 02: Supabase pgvector Search Index Summary
 
-**Azure AI Search index extended with 1536-dim HNSW vector field, 3 filterable metadata fields, uhr-semantic config, and IndexedDocument dataclass updated with backward-compatible optional vector + metadata parameters**
+Replaced Azure AI Search backend with Supabase pgvector — SQL migration creates `search_index` table and `hybrid_search`/`fts_search` RPCs; `search.py` production branch rewired to Supabase with RRF hybrid retrieval.
 
-## Performance
+## Tasks Completed
 
-- **Duration:** 2 min
-- **Started:** 2026-04-07T10:25:24Z
-- **Completed:** 2026-04-07T10:27:00Z
-- **Tasks:** 2
-- **Files modified:** 2
+| Task | Name | Commit | Files |
+|------|------|--------|-------|
+| 1 | SQL migration — search_index table + hybrid_search function | 159ac18 | backend/scripts/migrations/001_create_search_index.sql, backend/scripts/setup_search_index.py |
+| 2 | Rewrite search.py production branch for Supabase pgvector | 68d488a | backend/services/azure/search.py |
 
-## Accomplishments
-- Rewrote `setup_azure_search.py` with drop+recreate pattern, HNSW vector field (1536-dim cosine), 3 filterable fields, uhr-semantic SemanticConfiguration, and --dry-run flag
-- Extended `IndexedDocument` dataclass with 4 new optional fields: `content_vector`, `document_family`, `collection_date`, `document_subtype`
-- Extended `index_document()` with matching optional parameters and conditional upload dict (avoids Azure serialization error on None vectors)
+## What Was Built
 
-## Task Commits
+### SQL Migration (`001_create_search_index.sql`)
 
-Each task was committed atomically:
+- `search_index` table with `content_vector vector(1536)` plus text fields for content, source, entities, document metadata
+- Three indexes: `user_id` B-tree for filtering, IVFFlat for cosine similarity, GIN for Portuguese FTS
+- `hybrid_search()` RPC: Reciprocal Rank Fusion of vector similarity and full-text search (top 20 from each, fused with `1/(rrf_k + rank)` formula)
+- `fts_search()` RPC: Portuguese full-text fallback when no embedding provided
 
-1. **Task 1: Rewrite setup_azure_search.py with new schema (drop+recreate)** - `a5c00c9` (feat)
-2. **Task 2: Extend IndexedDocument and index_document() with vector + metadata fields** - `0921610` (feat)
+### Setup Helper (`setup_search_index.py`)
 
-**Plan metadata:** (docs commit follows)
+CLI with two modes:
+- `--print-sql`: prints migration to stdout for pasting into Supabase SQL Editor
+- `--check`: connects to Supabase and verifies `search_index` table exists
 
-## Files Created/Modified
-- `backend/scripts/setup_azure_search.py` - Drop+recreate index script with full Phase 4 schema (vector + metadata + semantic config)
-- `backend/services/azure/search.py` - IndexedDocument extended with 4 new optional fields; index_document() accepts and conditionally includes vector + metadata
+### search.py Rewrite (production branch)
 
-## Decisions Made
-- VECTOR_PROFILE_NAME and HNSW_CONFIG_NAME as module-level constants prevent profile name mismatch at runtime — names referenced in both VectorSearch profiles and SearchField must match exactly
-- content_vector excluded from upload dict when None — passing `"content_vector": None` causes an Azure SDK serialization error (Pitfall 2 per research)
-- algorithm_configuration_name uses snake_case per SDK requirement (not camelCase `algorithmConfigurationName`)
-- search() function left completely unchanged — BM25-only retrieval continues until Plan 05 adds hybrid search
-- Backward-compatible extension: all new parameters default to None so existing callers (indexer.py) work without modification
+- `_get_supabase_client()` lazy singleton using `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`
+- `index_document()`: upserts row into `search_index`; omits `content_vector` from row when `None` (avoids pgvector serialization error)
+- `search()`: calls `hybrid_search` RPC when `query_vector` provided, falls back to `fts_search` without
+- `IndexedDocument` dataclass extended with `content_vector`, `document_family`, `collection_date`, `document_subtype`
+- All new params default to `None` — existing callers (`indexer.py`) unaffected
+- Mock branch and `_mock_search()` completely unchanged
+
+## Verification
+
+```
+cd backend && python -c "from services.azure.search import index_document, search, IndexedDocument; print('ok')"
+# -> ok
+
+cd backend && python -c "import scripts.setup_search_index; print('ok')"
+# -> ok
+
+grep "azure.search.documents" backend/services/azure/search.py
+# -> (no output — Azure SDK removed)
+```
 
 ## Deviations from Plan
-None - plan executed exactly as written.
 
-## Issues Encountered
-- Acceptance criteria grep pattern `SemanticConfiguration(name="uhr-semantic"` expected the constructor call on one line; code uses standard multiline Python formatting. Both the class name and `name="uhr-semantic"` are present and correct in the file — no functional issue.
+None — plan executed exactly as written.
 
-## User Setup Required
-None - no external service configuration required for schema changes. The `setup_azure_search.py` script must be run once when ready to recreate the Azure AI Search index (handled in a later plan step).
+## Known Stubs
 
-## Next Phase Readiness
-- Index schema ready for vector uploads — RETRIEVE-01 complete
-- Plan 03 (embeddings service) can now be implemented: `content_vector` field is defined and `index_document()` will accept it
-- Plan 04 (indexer update) can wire embedding generation into the upload pipeline
-- Plan 05 (hybrid retriever) can update `search()` to use VectorizedQuery + semantic RRF
-- Existing mock mode continues to work — `_mock_search()` untouched
+None — migration SQL is complete and ready to run. Production branch fully wired to Supabase. Table will not exist until migration is applied in Supabase SQL Editor (intentional — requires human action documented in setup_search_index.py).
 
----
-*Phase: 04-hybrid-search-index*
-*Completed: 2026-04-07*
+## Self-Check: PASSED
+
+- `backend/scripts/migrations/001_create_search_index.sql` — exists
+- `backend/scripts/setup_search_index.py` — exists
+- `backend/services/azure/search.py` — modified
+- Commit `159ac18` — exists
+- Commit `68d488a` — exists
