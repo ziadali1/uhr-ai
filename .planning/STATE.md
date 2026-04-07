@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: Executing Phase 04
-stopped_at: Completed 04-02-PLAN.md — Azure Search index schema with vector + semantic config
-last_updated: "2026-04-07T10:08:20.099Z"
+stopped_at: Completed 04-01 Task 1 — Wave 0 test stubs; paused at Task 2 checkpoint (Azure tier verification)
+last_updated: "2026-04-07T10:09:19.241Z"
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 17
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -75,6 +75,8 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 04-02]: content_vector excluded from upload dict when None — Azure SDK serialization error on null vector (Pitfall 2)
 - [Phase 04-02]: search() function unchanged — BM25-only until Plan 05 adds hybrid retrieval
 - [Phase 04-02]: index_document() backward-compatible — all new params default None, existing callers (indexer.py) unaffected
+- [Phase 04-01]: All Wave 0 stubs use @pytest.mark.skip (not xfail) — skip is cleaner for Wave 0 where the module under test does not yet exist
+- [Phase 04-01]: Imports placed inside Wave 0 test bodies — prevents ImportError from blocking pytest collection when modules do not yet exist
 
 ## Performance Metrics
 
@@ -93,10 +95,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 03 P03 | 5min | 2 tasks | 0 files |
 | Phase 04 P02 | 2min | 2 tasks | 2 files |
 | Phase 04 P03 | 2min | 2 tasks | 7 files |
+| Phase 04 P01 | 2min | 1 tasks | 7 files |
 
 ## Last Session
 
-**Stopped at:** Completed 04-02-PLAN.md — Azure Search index schema with vector + semantic config
+**Stopped at:** Completed 04-01 Task 1 — Wave 0 test stubs; paused at Task 2 checkpoint (Azure tier verification)
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context
