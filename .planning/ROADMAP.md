@@ -131,12 +131,12 @@ Plans:
 
 **Requirements:** TIMELINE-01, TIMELINE-02, TIMELINE-03
 
-**Plans:**
-1. Implement `api/timeline.py`: `GET /timeline/observations/{analyte}`, `GET /timeline/conditions`, `GET /timeline/medications` endpoints
-2. Implement `GET /patient/summary` endpoint: active conditions, current medications, allergies, latest labs grouped by analyte
-3. Refactor `services/emergency.py` to query new patient tables instead of scanning documents
-4. Update frontend `app/dashboard/page.tsx` and `components/dashboard/PatientSummary.tsx` to display patient-level data
-5. Update emergency profile page to use new aggregated data
+**Plans:** 3 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Wave 0 test stubs + patient_query.py service layer (TIMELINE-01, TIMELINE-02)
+- [ ] 06-02-PLAN.md — Timeline/summary API routers + main.py registration + emergency.py refactor (TIMELINE-01, TIMELINE-02)
+- [ ] 06-03-PLAN.md — Frontend PatientStructuredData component + dashboard integration (TIMELINE-03)
 
 **Done when:**
 - Dashboard shows active conditions, current medications, and latest labs without querying individual documents
@@ -227,3 +227,4 @@ Phase 8 (Security) ── independent, can run in parallel with Phase 4-6
 *Phase 3 plans created: 2026-04-06*
 *Phase 4 plans created: 2026-04-06*
 *Phase 5 plans created: 2026-04-08*
+*Phase 6 plans created: 2026-04-08*
