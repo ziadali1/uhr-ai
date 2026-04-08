@@ -3,6 +3,7 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
 
+import pytest
 from unittest.mock import patch, MagicMock
 from services.rag.retriever import build_context_prompt
 
@@ -34,3 +35,10 @@ def test_retriever_degrades_when_embedding_fails():
         call_kwargs = mock_search.call_args
         # search should be called with query_vector=None
         assert "query_vector" in str(call_kwargs)
+
+
+@pytest.mark.skip(reason="Wave 0 stub — implement after retriever.py refactored in Plan 05-04")
+def test_context_includes_sql_section():
+    # Verifies that build_context_prompt returns context containing SQL structured block
+    # when route_query returns sql_only or mixed intent
+    pass
