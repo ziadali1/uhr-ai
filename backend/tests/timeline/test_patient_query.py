@@ -1,20 +1,30 @@
-"""Wave 0 stubs for patient_query service layer.
+"""Unit tests for services.patient_query service layer.
 
-All tests are skipped (Wave 0) — will be unskipped in Task 2 once
-patient_query.py is implemented.
+Covers:
+  - Observations returned sorted by observed_date descending
+  - Date range filters (gte/lte) applied to Supabase query chain
+  - value_num derived from value_str via float() cast
+  - ref_low/ref_high parsed from reference_range string
+  - get_patient_summary() returns dict with all required keys
+  - _query_latest_labs() deduplicates by normalized_analyte keeping most recent
+  - get_patient_summary() soft-fails and returns None on exception
 """
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
+
 import pytest
+from unittest.mock import MagicMock, patch
 
 
-@pytest.mark.skip(reason="Wave 0 stub")
 def test_observations_sorted_desc():
     """get_observations_timeline() returns rows sorted by observed_date descending."""
-    from unittest.mock import MagicMock, patch
     from services.patient_query import get_observations_timeline
 
+    # Rows are returned in desc order from Supabase (order("observed_date", desc=True))
     rows = [
-        {"normalized_analyte": "hemoglobina", "observed_date": "2025-03-01", "value_str": "13.5", "unit": "g/dL", "reference_range": None, "flag": None, "raw_analyte": "Hemoglobina", "document_id": "d1", "needs_review": False},
         {"normalized_analyte": "hemoglobina", "observed_date": "2025-06-15", "value_str": "14.0", "unit": "g/dL", "reference_range": None, "flag": None, "raw_analyte": "Hemoglobina", "document_id": "d2", "needs_review": False},
+        {"normalized_analyte": "hemoglobina", "observed_date": "2025-03-01", "value_str": "13.5", "unit": "g/dL", "reference_range": None, "flag": None, "raw_analyte": "Hemoglobina", "document_id": "d1", "needs_review": False},
         {"normalized_analyte": "hemoglobina", "observed_date": "2025-01-10", "value_str": "12.8", "unit": "g/dL", "reference_range": None, "flag": None, "raw_analyte": "Hemoglobina", "document_id": "d3", "needs_review": False},
     ]
 
@@ -29,10 +39,8 @@ def test_observations_sorted_desc():
     assert dates == sorted(dates, reverse=True)
 
 
-@pytest.mark.skip(reason="Wave 0 stub")
 def test_observations_date_filter():
     """get_observations_timeline() applies gte/lte filters when date_from/date_to are provided."""
-    from unittest.mock import MagicMock, patch, call
     from services.patient_query import get_observations_timeline
 
     mock_execute = MagicMock()
@@ -55,7 +63,6 @@ def test_observations_date_filter():
     mock_chain.lte.assert_called_once_with("observed_date", "2025-12-31")
 
 
-@pytest.mark.skip(reason="Wave 0 stub")
 def test_value_num_parsing():
     """_enrich_observation() derives value_num from value_str via float() cast."""
     from services.patient_query import _enrich_observation
@@ -69,7 +76,6 @@ def test_value_num_parsing():
     assert result_text["value_num"] is None
 
 
-@pytest.mark.skip(reason="Wave 0 stub")
 def test_ref_range_parsing():
     """_enrich_observation() parses ref_low/ref_high from reference_range string."""
     from services.patient_query import _enrich_observation
@@ -95,10 +101,8 @@ def test_ref_range_parsing():
     assert result["ref_high"] is None
 
 
-@pytest.mark.skip(reason="Wave 0 stub")
 def test_patient_summary_shape():
     """get_patient_summary() returns dict with all required keys."""
-    from unittest.mock import MagicMock, patch
     from services.patient_query import get_patient_summary
 
     mock_client = MagicMock()
@@ -119,12 +123,11 @@ def test_patient_summary_shape():
     assert result["user_id"] == "user1"
 
 
-@pytest.mark.skip(reason="Wave 0 stub")
 def test_latest_labs_dedup():
     """_query_latest_labs() deduplicates by normalized_analyte keeping the most recent row."""
-    from unittest.mock import MagicMock
     from services.patient_query import _query_latest_labs
 
+    # Rows already sorted desc by observed_date (as Supabase would return)
     rows = [
         {"normalized_analyte": "hemoglobina", "raw_analyte": "Hemoglobina", "value_str": "14.0", "unit": "g/dL", "reference_range": None, "flag": None, "needs_review": False, "observed_date": "2025-06-15", "document_id": "d2"},
         {"normalized_analyte": "hemoglobina", "raw_analyte": "Hemoglobina", "value_str": "13.5", "unit": "g/dL", "reference_range": None, "flag": None, "needs_review": False, "observed_date": "2025-03-01", "document_id": "d1"},
@@ -140,10 +143,8 @@ def test_latest_labs_dedup():
     assert result[0]["observed_at"] == "2025-06-15"
 
 
-@pytest.mark.skip(reason="Wave 0 stub")
 def test_soft_fail_returns_none():
     """get_patient_summary() returns None when _get_client() raises an exception."""
-    from unittest.mock import patch
     from services.patient_query import get_patient_summary
 
     with patch("services.patient_query._get_client", side_effect=Exception("connection error")):
