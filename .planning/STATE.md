@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: Executing Phase 05
-stopped_at: Completed 05-01 — Wave 0 test stubs for query routing and context assembly
-last_updated: "2026-04-08T10:39:36.907Z"
+stopped_at: Completed 05-02 — Query Router module
+last_updated: "2026-04-08T10:41:04.424Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 22
-  completed_plans: 18
+  completed_plans: 19
 ---
 
 # Project State
@@ -86,6 +86,8 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 04-06]: Script truncates search_index via delete().neq('id','') — Supabase REST lacks TRUNCATE
 - [Phase 04-06]: content_vector passed as-is (None) to index_document which already guards against null vector serialization
 - [Phase 05-01]: import pytest added to test_retriever.py (was missing before adding skip decorator)
+- [Phase 05-02]: Mock guard in route_query() returns search_only immediately — avoids RoutingResult validation failure on '{}' from generate_json() in mock mode (Pitfall 2)
+- [Phase 05-02]: time_range typed as list[str] | None, NOT tuple[date, date] — Pydantic 2.x JSON serialization compatibility (Pitfall 5)
 
 ## Performance Metrics
 
@@ -110,10 +112,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 04 P04 | 2min | 2 tasks | 3 files |
 | Phase 04 P06 | 3min | 1 tasks | 1 files |
 | Phase 05 P01 | 5min | 2 tasks | 2 files |
+| Phase 05 P02 | 2min | 2 tasks | 1 files |
 
 ## Last Session
 
-**Stopped at:** Completed 05-01 — Wave 0 test stubs for query routing and context assembly
+**Stopped at:** Completed 05-02 — Query Router module
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context
