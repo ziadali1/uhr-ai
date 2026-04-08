@@ -44,6 +44,7 @@ A patient's complete medical history — reliably extracted, reliably retrievabl
 **Milestone 3 — Clinical Intelligence**
 
 - [x] Query routing and context assembly: intent classification, SQL step execution against patient tables, clinical block formatting per document family — *Validated in Phase 5: query-routing-and-context-assembly*
+- [x] Patient timeline API and dashboard: REST endpoints for observations, conditions, medications, and summary; PatientStructuredData component surfaces patient aggregates in dashboard — *Validated in Phase 6: patient-timeline-api-and-dashboard*
 - [ ] Complex query support: trends over time, value ranges, comparisons across visits
 - [ ] Clinical reasoning: case summary, relevant findings, differential diagnosis suggestions with evidence and uncertainty
 - [x] Hybrid retrieval: pgvector (cosine) + full-text RRF search via Supabase — *Validated in Phase 4: hybrid-search-index*
@@ -115,4 +116,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-07 after Phase 4 completion (hybrid-search-index)*
+*Last updated: 2026-04-08 after Phase 6 completion (patient-timeline-api-and-dashboard)*
