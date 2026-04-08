@@ -23,7 +23,7 @@ This phase does NOT include: frontend timeline views (Phase 6), clinical reasoni
 
 ### Query Interpretation Architecture
 
-- **D-01:** Use the LLM as the **primary query interpreter** — a single LLM call that: classifies intent (`sql_only` | `search_only` | `mixed`), extracts entities (analyte names, medications, conditions, date ranges), resolves temporal references ("last year" → ISO date range), and emits a structured routing plan.
+- **D-01:** Use the LLM as the **primary query interpreter** — a single LLM call that: classifies intent (`sql_only` | `search_only` | `mixed`), extracts entities (analyte names, medications, conditions, date ranges), resolves temporal references ("last year" → ISO date range), decides tool usage (which retrieval tools to invoke and with what parameters), and emits a structured routing plan.
 - **D-02:** The interpreter produces a structured output (Pydantic model or JSON): intent type, extracted entities, time range if relevant, sub-questions if mixed intent.
 - **D-03:** No regex/keyword fallback for primary classification. The LLM interpreter IS the router. Keep it simple — one call, structured output.
 - **D-04:** On interpreter failure (LLM error, schema parse failure): fall back to `search_only` with the original query. Soft-fail — chat always responds.
@@ -38,7 +38,7 @@ This phase does NOT include: frontend timeline views (Phase 6), clinical reasoni
   - Reject queries with mutations (INSERT/UPDATE/DELETE/DROP — case-insensitive check)
   - Log every generated + validated query at DEBUG level
 - **D-08:** SQL queries target the patient tables from Phase 2/3 — not the raw `documents` table. Supported query types: observation trends (aggregation by analyte + date), active medications (filter by status), current conditions (filter by clinical_status='active'), recent imaging findings.
-- **D-09:** SQL failures soft-fail: if the query fails, log the error and continue with search-only retrieval. Same pattern as Phase 1–4 soft-fail.
+- **D-09:** SQL failures soft-fail: if the query fails, log the error and continue with either (a) `search_only` retrieval using the original question, or (b) hybrid context with whatever partial structured data was retrieved before the failure. The fallback mode is chosen based on how much data was recovered — if partial SQL results are meaningful, include them alongside search results rather than discarding entirely.
 
 ### Context Assembly (Chat Context)
 
@@ -51,7 +51,7 @@ This phase does NOT include: frontend timeline views (Phase 6), clinical reasoni
   Entities: {key clinical entities}
   ```
   Plain text, compact. No JSON in the prompt.
-- **D-12:** Patient-level SQL results come **first** in the context block, before retrieved documents. SQL results are formatted as compact fact tables:
+- **D-12:** Patient-level SQL results come **first** in the context block, before retrieved documents, and are treated as **ground truth facts** (structured, verified patient data takes precedence over document excerpts). SQL results are formatted as compact fact tables:
   ```
   === DADOS ESTRUTURADOS DO PACIENTE ===
   HbA1c: 6.2% (2024-01-15), 6.8% (2023-09-10), 7.1% (2023-03-05)
@@ -68,7 +68,7 @@ This phase does NOT include: frontend timeline views (Phase 6), clinical reasoni
 ### Mixed Intent / LLM Planner
 
 - **D-15:** For `mixed` intent: the interpreter (D-01/D-02) decomposes the question into sub-steps (e.g., "get HbA1c trend via SQL" + "retrieve endocrinology visit notes via search"). Each step is executed independently, results merged.
-- **D-16:** Result synthesis for mixed intent: both SQL data and retrieved documents are passed to Claude in the same prompt (D-12/D-13 ordering). Claude is responsible for synthesizing the answer — no second LLM call for synthesis. The system prompt instructs Claude to reason over structured data first, then use retrieved documents as evidence.
+- **D-16:** Result synthesis for mixed intent: both SQL data and retrieved documents are passed to Claude in the same prompt (D-12/D-13 ordering). **Single synthesis call by default** — Claude reasons over the unified context and synthesizes the answer. A second dedicated synthesis call (e.g., for multi-step clinical reasoning) is explicitly deferred to a future extension; do not implement in Phase 5.
 - **D-17:** The router is designed as a **tool-using clinical reasoning agent** — flexibility and diagnostic capability over production-grade template rigidity. This is a prototype/research project.
 
 ### System Prompt Updates
