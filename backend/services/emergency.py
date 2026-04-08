@@ -105,7 +105,7 @@ def build_emergency_profile(user_id: str) -> EmergencyProfile | None:
             if not lbu(user_id):
                 return None
         except Exception:
-            return None
+            pass  # Can't verify documents — return empty profile rather than 404
 
     # If client_failed but we have absolutely nothing, still return profile with empty lists
     # (soft-fail: never raise, always return a usable — possibly empty — profile)

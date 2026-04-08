@@ -15,7 +15,10 @@ router = APIRouter()
 
 @router.get("/analysis", response_model=AnalysisResult)
 def get_analysis(user_id: str = Depends(get_current_user)):
-    result = analyze_patient(user_id)
+    try:
+        result = analyze_patient(user_id)
+    except NotImplementedError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
     if result is None:
         raise HTTPException(
             status_code=404,
