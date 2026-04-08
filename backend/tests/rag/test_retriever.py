@@ -52,8 +52,37 @@ def test_retriever_degrades_when_embedding_fails():
         assert "query_vector" in str(call_kwargs)
 
 
-@pytest.mark.skip(reason="Wave 0 stub — implement after retriever.py refactored in Plan 05-04")
 def test_context_includes_sql_section():
-    # Verifies that build_context_prompt returns context containing SQL structured block
-    # when route_query returns sql_only or mixed intent
-    pass
+    """Verifies build_context_prompt returns context containing SQL structured block
+    when route_query returns sql_only intent."""
+    from services.rag.router import RoutingResult
+
+    routing = RoutingResult(
+        intent="sql_only",
+        sql_steps=["medications:active"],
+        search_queries=[],
+    )
+    sql_results = [
+        {
+            "step": "medications:active",
+            "table": "patient_medications",
+            "rows": [{"raw_medication": "Metformina", "dose": "850mg", "frequency": "2x ao dia"}],
+        }
+    ]
+    sql_block_text = (
+        "=== DADOS ESTRUTURADOS DO PACIENTE ===\n"
+        "Medicamento: Metformina 850mg\n"
+        "=== FIM DOS DADOS ESTRUTURADOS ==="
+    )
+
+    with patch.dict(os.environ, {"USE_MOCK_AZURE": "false"}), \
+         patch("services.rag.retriever.route_query", return_value=routing), \
+         patch("services.rag.retriever.execute_sql_steps", return_value=sql_results), \
+         patch("services.rag.retriever.format_sql_block", return_value=sql_block_text), \
+         patch("services.rag.retriever.generate_embedding", return_value=None), \
+         patch("services.rag.retriever.search", return_value=[]):
+        system_prompt, sources = build_context_prompt("Quais sao minhas medicacoes ativas?", "user-1")
+
+    assert "DADOS ESTRUTURADOS DO PACIENTE" in system_prompt
+    assert "Metformina" in system_prompt
+    assert isinstance(sources, list)
