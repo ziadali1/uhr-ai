@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: Executing Phase 06
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-04-08T19:16:46.067Z"
+stopped_at: Completed 06-03-PLAN.md
+last_updated: "2026-04-08T19:22:16.297Z"
 progress:
   total_phases: 8
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 25
-  completed_plans: 24
+  completed_plans: 25
 ---
 
 # Project State
@@ -98,6 +98,9 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 06-01]: date_from/date_to sliced to [:10] chars before Supabase .gte/.lte call per Pitfall 4
 - [Phase 06-02]: Emergency soft-fail returns EmergencyProfile with empty lists when _get_client raises — never None on DB error
 - [Phase 06-02]: client_failed flag distinguishes DB error from successful-but-empty query for None-return logic
+- [Phase 06-03]: PatientStructuredData duplicates Section component locally to avoid export coupling with PatientSummary
+- [Phase 06-03]: flagClasses() returns null for unknown/normal flags — no badge rendered, not an error
+- [Phase 06-03]: Empty-all-arrays and error states both show same 'Nenhum dado clinico' CTA — user sees helpful upload prompt regardless of cause
 
 ## Performance Metrics
 
@@ -128,10 +131,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 05 P05 | 5min | 2 tasks | 2 files |
 | Phase 06 P01 | 2min | 2 tasks | 4 files |
 | Phase 06 P02 | 5min | 2 tasks | 5 files |
+| Phase 06 P03 | 2min | 2 tasks | 3 files |
 
 ## Last Session
 
-**Stopped at:** Completed 06-02-PLAN.md
+**Stopped at:** Completed 06-03-PLAN.md
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context

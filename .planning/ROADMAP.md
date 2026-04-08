@@ -131,12 +131,12 @@ Plans:
 
 **Requirements:** TIMELINE-01, TIMELINE-02, TIMELINE-03
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 06-01-PLAN.md — Wave 0 test stubs + patient_query.py service layer (TIMELINE-01, TIMELINE-02)
 - [x] 06-02-PLAN.md — Timeline/summary API routers + main.py registration + emergency.py refactor (TIMELINE-01, TIMELINE-02)
-- [ ] 06-03-PLAN.md — Frontend PatientStructuredData component + dashboard integration (TIMELINE-03)
+- [x] 06-03-PLAN.md — Frontend PatientStructuredData component + dashboard integration (TIMELINE-03)
 
 **Done when:**
 - Dashboard shows active conditions, current medications, and latest labs without querying individual documents
