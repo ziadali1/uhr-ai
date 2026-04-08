@@ -38,12 +38,12 @@ created: 2026-04-08
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 6-01-01 | 01 | 1 | TIMELINE-01 | integration | `pytest tests/test_timeline_api.py -x -q` | ❌ W0 | ⬜ pending |
-| 6-01-02 | 01 | 1 | TIMELINE-01 | integration | `pytest tests/test_timeline_api.py -x -q` | ❌ W0 | ⬜ pending |
-| 6-02-01 | 02 | 1 | TIMELINE-02 | integration | `pytest tests/test_patient_summary.py -x -q` | ❌ W0 | ⬜ pending |
-| 6-03-01 | 03 | 2 | TIMELINE-02 | integration | `pytest tests/test_emergency.py -x -q` | ❌ W0 | ⬜ pending |
-| 6-04-01 | 04 | 3 | TIMELINE-03 | e2e/manual | See Manual-Only | N/A | ⬜ pending |
-| 6-05-01 | 05 | 3 | TIMELINE-03 | e2e/manual | See Manual-Only | N/A | ⬜ pending |
+| 6-01-01 | 01 | 1 | TIMELINE-01, TIMELINE-02 | collection | `pytest backend/tests/timeline/ --collect-only -q` | ❌ W0 | ⬜ pending |
+| 6-01-02 | 01 | 1 | TIMELINE-01, TIMELINE-02 | unit | `pytest backend/tests/timeline/test_patient_query.py -x -q` | ❌ W0 | ⬜ pending |
+| 6-02-01 | 02 | 2 | TIMELINE-01, TIMELINE-02 | unit | `python -c "import api.timeline, api.summary"` | ❌ W0 | ⬜ pending |
+| 6-02-02 | 02 | 2 | TIMELINE-02 | unit | `pytest backend/tests/timeline/test_emergency_refactor.py -x -q` | ❌ W0 | ⬜ pending |
+| 6-03-01 | 03 | 3 | TIMELINE-03 | type-check | `npx tsc --noEmit` | N/A | ⬜ pending |
+| 6-03-02 | 03 | 3 | TIMELINE-03 | manual | See Manual-Only | N/A | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -51,10 +51,10 @@ created: 2026-04-08
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_timeline_api.py` — stubs for TIMELINE-01 (observations, conditions, medications endpoints)
-- [ ] `tests/test_patient_summary.py` — stubs for TIMELINE-02 (patient summary endpoint)
-- [ ] `tests/test_emergency.py` — stubs for emergency.py refactor (TIMELINE-02)
-- [ ] `tests/conftest.py` — shared fixtures (mock supabase client, sample patient data)
+- [ ] `backend/tests/timeline/test_patient_query.py` — stubs for TIMELINE-01 and TIMELINE-02 (observations, summary, emergency)
+- [ ] `backend/tests/timeline/test_emergency_refactor.py` — stubs for emergency.py refactor (TIMELINE-02)
+- [ ] `backend/tests/timeline/__init__.py` — package marker
+- [ ] `backend/tests/conftest.py` — shared fixtures (mock supabase client, sample patient data)
 
 ---
 
