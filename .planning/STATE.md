@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: Executing Phase 05
-stopped_at: Completed 05-03 — Chat context assembler (assemble_chat_block)
-last_updated: "2026-04-08T10:43:23.033Z"
+stopped_at: Completed 05-04 — Retriever router wiring
+last_updated: "2026-04-08T10:48:54.204Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 22
-  completed_plans: 20
+  completed_plans: 21
 ---
 
 # Project State
@@ -90,6 +90,8 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 05-02]: time_range typed as list[str] | None, NOT tuple[date, date] — Pydantic 2.x JSON serialization compatibility (Pitfall 5)
 - [Phase 05-03]: models.document imported directly in router.py — D-10: context_block.py is read-only, not re-used for chat assembler
 - [Phase 05-03]: assemble_chat_block uses excerpt[:400] fallback for unknown family and dispatch exceptions — same soft-fail principle as D-04 for route_query
+- [Phase 05-04]: Route query before retrieval: route_query() called first before any embedding or SQL — api/chat.py signature unchanged
+- [Phase 05-04]: assemble_chat_block called per search result with collection_date=None (SearchResult lacks date; assembler handles gracefully)
 
 ## Performance Metrics
 
@@ -116,10 +118,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 05 P01 | 5min | 2 tasks | 2 files |
 | Phase 05 P02 | 2min | 2 tasks | 1 files |
 | Phase 05 P03 | 4min | 1 tasks | 1 files |
+| Phase 05 P04 | 8min | 1 tasks | 2 files |
 
 ## Last Session
 
-**Stopped at:** Completed 05-03 — Chat context assembler (assemble_chat_block)
+**Stopped at:** Completed 05-04 — Retriever router wiring
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context

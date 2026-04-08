@@ -108,13 +108,13 @@ Plans:
 
 **Requirements:** RETRIEVE-04, RETRIEVE-05
 
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [x] 05-01-PLAN.md — Wave 0 test stubs: test_router.py (11 stubs) + test_retriever.py new stub (RETRIEVE-04, RETRIEVE-05)
 - [x] 05-02-PLAN.md — router.py core: RoutingResult, expand_abbreviations(), route_query(), SQL executor functions (RETRIEVE-04)
 - [x] 05-03-PLAN.md — router.py chat assembler: _fetch_structured_result(), assemble_chat_block() per document family (RETRIEVE-05)
-- [ ] 05-04-PLAN.md — retriever.py refactor: wire route_query + execute_sql_steps + assemble_chat_block, update SYSTEM_PROMPT (RETRIEVE-04, RETRIEVE-05)
+- [x] 05-04-PLAN.md — retriever.py refactor: wire route_query + execute_sql_steps + assemble_chat_block, update SYSTEM_PROMPT (RETRIEVE-04, RETRIEVE-05)
 - [ ] 05-05-PLAN.md — Unskip and implement all 12 test stubs; full suite green (RETRIEVE-04, RETRIEVE-05)
 
 **Done when:**
