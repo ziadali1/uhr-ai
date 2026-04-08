@@ -43,6 +43,7 @@ A patient's complete medical history — reliably extracted, reliably retrievabl
 
 **Milestone 3 — Clinical Intelligence**
 
+- [x] Query routing and context assembly: intent classification, SQL step execution against patient tables, clinical block formatting per document family — *Validated in Phase 5: query-routing-and-context-assembly*
 - [ ] Complex query support: trends over time, value ranges, comparisons across visits
 - [ ] Clinical reasoning: case summary, relevant findings, differential diagnosis suggestions with evidence and uncertainty
 - [x] Hybrid retrieval: pgvector (cosine) + full-text RRF search via Supabase — *Validated in Phase 4: hybrid-search-index*
