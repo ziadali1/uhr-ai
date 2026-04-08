@@ -72,9 +72,8 @@ def delete(entry_id: str, user_id: str) -> None:
 
 def _sync_to_patient_table(user_id: str, entry: HealthEntry) -> None:
     """Dual-write a health entry into the corresponding patient table (best-effort)."""
-    from services.supabase_store import _get_client as _sb_client
     try:
-        client = _sb_client()
+        client = _get_client()
         if entry.entry_type in (HealthEntryType.medication_current, HealthEntryType.medication_past):
             status = "active" if entry.entry_type == HealthEntryType.medication_current else "stopped"
             client.table("patient_medications").upsert(
@@ -122,9 +121,8 @@ def _sync_to_patient_table(user_id: str, entry: HealthEntry) -> None:
 
 def _remove_from_patient_table(user_id: str, entry: HealthEntry) -> None:
     """Remove or deactivate the patient table row corresponding to a deleted health entry."""
-    from services.supabase_store import _get_client as _sb_client
     try:
-        client = _sb_client()
+        client = _get_client()
         norm = entry.name.strip().lower()
         if entry.entry_type in (HealthEntryType.medication_current, HealthEntryType.medication_past):
             client.table("patient_medications").delete().eq("user_id", user_id).eq("normalized_medication", norm).eq("document_id", None).execute()
