@@ -1,15 +1,11 @@
-"""Wave 0 stubs for emergency.py refactor.
+"""Tests for emergency.py refactor — patient table queries instead of document scan.
 
-Tests verify that build_emergency_profile() queries patient tables
-instead of using list_by_user() from document_store.
-
-All tests are skipped (Wave 0) — will be unskipped in Plan 02 when
-emergency.py is refactored.
+Verifies that build_emergency_profile() queries patient_conditions, patient_medications,
+patient_allergies tables and soft-fails on DB errors per D-09/D-12.
 """
 import pytest
 
 
-@pytest.mark.skip(reason="Wave 0 stub")
 def test_queries_patient_tables():
     """build_emergency_profile() queries patient_conditions, patient_medications, patient_allergies."""
     from unittest.mock import MagicMock, patch
@@ -20,7 +16,8 @@ def test_queries_patient_tables():
     mock_client.table.return_value.select.return_value.eq.return_value.eq.return_value.execute.return_value.data = []
     mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = []
 
-    with patch("services.emergency._get_client", return_value=mock_client):
+    with patch("services.emergency._get_client", return_value=mock_client), \
+         patch("services.emergency.list_by_user", return_value=[], create=True):
         build_emergency_profile("user1")
 
     table_calls = [c[0][0] for c in mock_client.table.call_args_list]
@@ -29,14 +26,14 @@ def test_queries_patient_tables():
     assert "patient_allergies" in table_calls, "Expected query on patient_allergies"
 
 
-@pytest.mark.skip(reason="Wave 0 stub")
 def test_soft_fail_on_table_error():
     """build_emergency_profile() returns EmergencyProfile with empty lists when _get_client() raises."""
     from unittest.mock import patch
     from services.emergency import build_emergency_profile
     from models.emergency import EmergencyProfile
 
-    with patch("services.emergency._get_client", side_effect=Exception("DB error")):
+    with patch("services.emergency._get_client", side_effect=Exception("DB error")), \
+         patch("services.document_store.list_by_user", return_value=[]):
         result = build_emergency_profile("user1")
 
     assert result is not None, "Expected EmergencyProfile, not None"
