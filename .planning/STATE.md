@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: Executing Phase 05
-stopped_at: Completed 05-04 — Retriever router wiring
-last_updated: "2026-04-08T10:48:54.204Z"
+stopped_at: Completed 05-05 — Wave 3 test implementation
+last_updated: "2026-04-08T10:52:39.147Z"
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 22
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # Project State
@@ -92,6 +92,8 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 05-03]: assemble_chat_block uses excerpt[:400] fallback for unknown family and dispatch exceptions — same soft-fail principle as D-04 for route_query
 - [Phase 05-04]: Route query before retrieval: route_query() called first before any embedding or SQL — api/chat.py signature unchanged
 - [Phase 05-04]: assemble_chat_block called per search result with collection_date=None (SearchResult lacks date; assembler handles gracefully)
+- [Phase 05]: patch _use_mock_cache to None before each mock-mode test so _use_mock() re-reads env var (cache invalidation)
+- [Phase 05]: test_sql_user_isolation uses select_mock.eq.call_args_list to inspect first .eq() call in chain — method_calls on mock_client only shows top-level calls
 
 ## Performance Metrics
 
@@ -119,10 +121,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 05 P02 | 2min | 2 tasks | 1 files |
 | Phase 05 P03 | 4min | 1 tasks | 1 files |
 | Phase 05 P04 | 8min | 1 tasks | 2 files |
+| Phase 05 P05 | 5min | 2 tasks | 2 files |
 
 ## Last Session
 
-**Stopped at:** Completed 05-04 — Retriever router wiring
+**Stopped at:** Completed 05-05 — Wave 3 test implementation
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context
