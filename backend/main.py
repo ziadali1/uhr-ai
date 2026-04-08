@@ -18,11 +18,13 @@ from api.chat import router as chat_router
 from api.analysis import router as analysis_router
 from api.emergency import router as emergency_router
 from api.health_profile import router as health_router
+from api.timeline import router as timeline_router
+from api.summary import router as summary_router
 
 app = FastAPI(
     title="UHR — Unified Health Record",
     description="API para centralização e análise de históricos médicos com Azure AI",
-    version="0.5.0",
+    version="0.6.0",
 )
 
 import os
@@ -48,8 +50,10 @@ app.include_router(chat_router, tags=["Agente IA"])
 app.include_router(analysis_router, tags=["Análise"])
 app.include_router(emergency_router, tags=["Emergência"])
 app.include_router(health_router, tags=["Saúde Manual"])
+app.include_router(timeline_router, tags=["Timeline"])
+app.include_router(summary_router, tags=["Paciente"])
 
 
 @app.get("/health", tags=["Sistema"])
 def health_check():
-    return {"status": "ok", "version": "0.5.0", "phase": 5}
+    return {"status": "ok", "version": "0.6.0", "phase": 6}
