@@ -314,3 +314,58 @@ export function emergencyPdfUrl(userId: string): string {
 export function emergencyQrUrl(userId: string): string {
   return `${API_BASE}/emergency/${userId}/qr`;
 }
+
+// ── Patient Summary (Phase 6) ──────────────────────────────────────
+
+export interface PatientConditionItem {
+  normalized_condition: string;
+  raw_condition: string | null;
+  clinical_status: string;
+  verification_status: string | null;
+}
+
+export interface PatientMedicationItem {
+  normalized_medication: string;
+  raw_medication: string | null;
+  dose: string | null;
+  route: string | null;
+  frequency: string | null;
+  status: string;
+}
+
+export interface PatientAllergyItem {
+  normalized_allergen: string;
+  raw_allergen: string | null;
+  reaction: string | null;
+}
+
+export interface PatientLabItem {
+  analyte_norm: string;
+  analyte_raw: string | null;
+  value_str: string | null;
+  value_num: number | null;
+  unit: string | null;
+  ref_low: number | null;
+  ref_high: number | null;
+  flag: string | null;
+  needs_review: boolean;
+  observed_at: string | null;
+  document_id: string | null;
+}
+
+export interface PatientSummaryResponse {
+  user_id: string;
+  active_conditions: PatientConditionItem[];
+  current_medications: PatientMedicationItem[];
+  allergies: PatientAllergyItem[];
+  latest_labs: PatientLabItem[];
+}
+
+export async function getPatientSummary(): Promise<PatientSummaryResponse> {
+  const res = await fetch(`${API_BASE}/patient/summary`, { headers: await authHeaders() });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Erro ao carregar dados clínicos");
+  }
+  return res.json();
+}
