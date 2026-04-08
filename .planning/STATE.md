@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: Executing Phase 06
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-04-08T19:11:17.754Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-04-08T19:16:46.067Z"
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 25
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # Project State
@@ -96,6 +96,8 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 05]: test_sql_user_isolation uses select_mock.eq.call_args_list to inspect first .eq() call in chain — method_calls on mock_client only shows top-level calls
 - [Phase 06-01]: value_num and ref_low/ref_high are NOT DB columns — derived at query-time from value_str and reference_range in _enrich_observation()
 - [Phase 06-01]: date_from/date_to sliced to [:10] chars before Supabase .gte/.lte call per Pitfall 4
+- [Phase 06-02]: Emergency soft-fail returns EmergencyProfile with empty lists when _get_client raises — never None on DB error
+- [Phase 06-02]: client_failed flag distinguishes DB error from successful-but-empty query for None-return logic
 
 ## Performance Metrics
 
@@ -125,10 +127,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 05 P04 | 8min | 1 tasks | 2 files |
 | Phase 05 P05 | 5min | 2 tasks | 2 files |
 | Phase 06 P01 | 2min | 2 tasks | 4 files |
+| Phase 06 P02 | 5min | 2 tasks | 5 files |
 
 ## Last Session
 
-**Stopped at:** Completed 06-01-PLAN.md
+**Stopped at:** Completed 06-02-PLAN.md
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context
