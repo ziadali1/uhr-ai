@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 1
 status: Executing Phase 05
-stopped_at: Completed 05-02 — Query Router module
-last_updated: "2026-04-08T10:41:04.424Z"
+stopped_at: Completed 05-03 — Chat context assembler (assemble_chat_block)
+last_updated: "2026-04-08T10:43:23.033Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 22
-  completed_plans: 19
+  completed_plans: 20
 ---
 
 # Project State
@@ -88,6 +88,8 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 05-01]: import pytest added to test_retriever.py (was missing before adding skip decorator)
 - [Phase 05-02]: Mock guard in route_query() returns search_only immediately — avoids RoutingResult validation failure on '{}' from generate_json() in mock mode (Pitfall 2)
 - [Phase 05-02]: time_range typed as list[str] | None, NOT tuple[date, date] — Pydantic 2.x JSON serialization compatibility (Pitfall 5)
+- [Phase 05-03]: models.document imported directly in router.py — D-10: context_block.py is read-only, not re-used for chat assembler
+- [Phase 05-03]: assemble_chat_block uses excerpt[:400] fallback for unknown family and dispatch exceptions — same soft-fail principle as D-04 for route_query
 
 ## Performance Metrics
 
@@ -113,10 +115,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 04 P06 | 3min | 1 tasks | 1 files |
 | Phase 05 P01 | 5min | 2 tasks | 2 files |
 | Phase 05 P02 | 2min | 2 tasks | 1 files |
+| Phase 05 P03 | 4min | 1 tasks | 1 files |
 
 ## Last Session
 
-**Stopped at:** Completed 05-02 — Query Router module
+**Stopped at:** Completed 05-03 — Chat context assembler (assemble_chat_block)
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context
