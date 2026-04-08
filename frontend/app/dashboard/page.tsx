@@ -1,7 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import { Upload, MessageSquare, QrCode, Brain } from "lucide-react";
+import { Upload, MessageSquare, QrCode, Brain, Activity } from "lucide-react";
 import { PatientSummary } from "@/components/dashboard/PatientSummary";
+import { PatientStructuredData } from "@/components/dashboard/PatientStructuredData";
 
 const quickLinks: { icon: React.ElementType; title: string; description: string; href: string; color: string; disabled?: boolean; badge?: string }[] = [
   {
@@ -71,6 +72,18 @@ export default function DashboardPage() {
           <h2 className="text-base font-semibold text-gray-800">Análise do Histórico</h2>
         </div>
         <PatientSummary />
+      </div>
+
+      {/* Dados Clínicos */}
+      <div>
+        <div className="mb-4 flex items-center gap-2">
+          <div className="rounded-lg bg-teal-50 p-1.5 text-teal-600">
+            <Activity className="h-4 w-4" />
+          </div>
+          <h2 className="text-base font-semibold text-gray-800">Dados Clínicos</h2>
+          <p className="text-xs text-gray-500">Informações estruturadas extraídas dos documentos.</p>
+        </div>
+        <PatientStructuredData />
       </div>
     </div>
   );
