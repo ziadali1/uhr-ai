@@ -39,12 +39,13 @@ Declared values (must be multiples of 4):
 | xs | 4px | Icon gaps (`gap-1`), bullet dot margin |
 | sm | 8px | Compact element spacing, icon padding (`p-1.5`) |
 | md | 16px | Default element spacing, card padding (`p-4`) |
-| lg | 20px | Card body padding (`p-5`), section inner spacing |
 | xl | 24px | Section gaps (`space-y-6`), grid gaps (`gap-4`) |
 | 2xl | 32px | Major section breaks (`space-y-8`) |
 | 3xl | 48px | Page-level spacing (empty state `py-12`) |
 
-Exceptions: Touch targets for the "Atualizar" refresh button must be minimum 44px tall (keyboard/pointer accessibility) — use `py-2.5` minimum on the button.
+Note: The existing Section card component uses Tailwind `p-5` (20px) — this is a pre-existing one-off in the codebase, not a new spacing token. Do not introduce `lg = 20px` as a scale token. New components must use `p-4` (16px) or `p-6` (24px) for card body padding.
+
+Exceptions: Touch targets for the "Atualizar dados" refresh button must be minimum 44px tall (keyboard/pointer accessibility) — use `py-2.5` minimum on the button.
 
 Source: derived from existing `dashboard/page.tsx` and `PatientSummary.tsx` class patterns.
 
@@ -54,14 +55,16 @@ Source: derived from existing `dashboard/page.tsx` and `PatientSummary.tsx` clas
 
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
-| Body | 14px (`text-sm`) | 400 (regular) | 1.5 (`leading-relaxed`) | List items, observation values, medication names |
 | Label | 12px (`text-xs`) | 400 (regular) | 1.4 | Metadata, dates, units, flags, document count, disclaimer text |
+| Body | 14px (`text-sm`) | 400 (regular) | 1.5 (`leading-relaxed`) | List items, observation values, medication names |
 | Heading | 14px (`text-sm`) | 600 (semibold) | 1.2 | Section titles (`font-semibold text-gray-800`) |
-| Display | 24px (`text-2xl`) | 700 (bold) | 1.2 | Page title (`font-bold text-gray-900`) |
+| Display | 24px (`text-2xl`) | 600 (semibold) | 1.2 | Page title (`font-semibold text-gray-900`) |
 
-Note: 3 distinct sizes in use (12, 14, 24). The 14px heading and 14px body are differentiated by weight, not size — consistent with existing codebase pattern. Do not add a 4th size.
+Weights: exactly 2 — 400 (regular) and 600 (semibold, `font-semibold`). Do not use `font-bold` (700) anywhere in this phase.
 
-Source: pre-populated from `dashboard/page.tsx` and `PatientSummary.tsx` observed class usage.
+Note: 14px heading and 14px body are differentiated by weight, not size — consistent with existing codebase pattern. Do not add a 4th size.
+
+Source: pre-populated from `dashboard/page.tsx` and `PatientSummary.tsx` observed class usage. Display weight updated from 700 to 600 per checker revision.
 
 ---
 
@@ -90,6 +93,14 @@ Source: directly extracted from `PatientSummary.tsx` Section component usage.
 
 ---
 
+## Focal Point
+
+Primary screen: the dashboard page after this phase contains two stacked sections — "Análise do Histórico" (existing LLM panel) and "Dados Clínicos" (new structured data panel).
+
+Focal point: the "Dados Clínicos" section heading and its 2-column grid of Section cards. This is the primary new visual element the user's eye should land on when scrolling past the analysis panel. It is positioned immediately below the existing `<PatientSummary />` block, separated by `space-y-8` (32px). The section heading uses the Display style (`font-semibold text-2xl text-gray-900`). No hero image, illustration, or decorative element — the card grid itself is the focal anchor.
+
+---
+
 ## Component Inventory
 
 Reuse these exact existing patterns — do not invent new structural components:
@@ -104,7 +115,7 @@ Reuse these exact existing patterns — do not invent new structural components:
   {children}
 </div>
 ```
-Used by: PatientSummary.tsx `Section` component. New structured data section must import and reuse this `Section` component.
+Used by: PatientSummary.tsx `Section` component. New structured data section must import and reuse this `Section` component. The `p-5` on this existing component is preserved as-is — do not change existing component markup.
 
 ### Loading state (existing, reuse)
 ```
@@ -176,10 +187,10 @@ All copy is in Brazilian Portuguese, consistent with existing UI. No English str
 | Empty list — alergias | "Nenhuma alergia registrada." |
 | Empty list — exames | "Nenhum exame registrado." |
 | needs_review tooltip | "Valor com conflito de deduplicação — pode requerer revisão" |
-| Refresh button | "Atualizar" |
+| Refresh button | "Atualizar dados" |
 | Destructive confirmation | none — no destructive actions in this phase |
 
-Source: language style derived from existing Brazilian Portuguese strings in `PatientSummary.tsx` and `dashboard/page.tsx`.
+Source: language style derived from existing Brazilian Portuguese strings in `PatientSummary.tsx` and `dashboard/page.tsx`. "Atualizar" updated to "Atualizar dados" per checker recommendation.
 
 ---
 
@@ -189,7 +200,7 @@ Source: language style derived from existing Brazilian Portuguese strings in `Pa
 
 1. Renders below the existing "Análise do Histórico" section in `dashboard/page.tsx` — additive, not replacing (CONTEXT.md D-01).
 2. Fetches `GET /patient/summary` on mount via `useEffect`. Shows loading spinner during fetch. Shows empty state if response has zero items across all categories. Shows error state if fetch throws.
-3. Refresh button (text link, not primary button) triggers re-fetch. Uses existing `RefreshCw` icon at `h-3 w-3`, `text-xs text-gray-400 hover:text-gray-600` — matches existing PatientSummary refresh button pattern exactly.
+3. Refresh button (text link, not primary button) triggers re-fetch. Uses existing `RefreshCw` icon at `h-3 w-3`, `text-xs text-gray-400 hover:text-gray-600` — matches existing PatientSummary refresh button pattern exactly. Label: "Atualizar dados".
 4. No pagination in Phase 6. All active conditions, current medications, allergies, and latest labs per analyte render inline. Volume is expected to be small (personal health record — single user).
 5. Observation items with `flag = "H" | "HH"` render with red tint badge. Items with `flag = "L" | "LL"` render with blue tint badge. Items with `flag = null` or `"normal"` render no badge.
 6. Items with `needs_review = true` render an amber dot indicator (no blocking UI).
@@ -231,4 +242,5 @@ No new component libraries or registries are introduced. All UI is built from ex
 
 *Phase: 06-patient-timeline-api-and-dashboard*
 *UI-SPEC authored: 2026-04-08*
+*UI-SPEC revised: 2026-04-08 — checker fixes: collapsed typography to 2 weights (dropped 700, display now uses 600); removed non-standard lg=20px spacing token; updated refresh button copy to "Atualizar dados"; added focal point declaration.*
 *Sources: CONTEXT.md decisions D-01 through D-12; existing PatientSummary.tsx; dashboard/page.tsx; layout.tsx; globals.css; tailwind.config.ts; lib/api.ts*
