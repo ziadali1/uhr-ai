@@ -108,12 +108,14 @@ Plans:
 
 **Requirements:** RETRIEVE-04, RETRIEVE-05
 
-**Plans:**
-1. Implement query intent classifier in `services/rag/router.py`: detect aggregation/numeric queries, temporal queries, narrative queries, mixed
-2. Implement SQL query handlers for structured intents: observation trends, active medications, current conditions
-3. Implement structured context block assembler: per retrieved document, extract `findings[]`, `summary`, `entities_for_memory` — format as compact clinical block (<300 tokens)
-4. Refactor `api/chat.py` to use router before retrieval; merge SQL + search results into unified context
-5. Add Portuguese medical abbreviation expansion for common terms (HbA1c, PA, FC, FR, SpO2)
+**Plans:** 5 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Wave 0 test stubs: test_router.py (11 stubs) + test_retriever.py new stub (RETRIEVE-04, RETRIEVE-05)
+- [ ] 05-02-PLAN.md — router.py core: RoutingResult, expand_abbreviations(), route_query(), SQL executor functions (RETRIEVE-04)
+- [ ] 05-03-PLAN.md — router.py chat assembler: _fetch_structured_result(), assemble_chat_block() per document family (RETRIEVE-05)
+- [ ] 05-04-PLAN.md — retriever.py refactor: wire route_query + execute_sql_steps + assemble_chat_block, update SYSTEM_PROMPT (RETRIEVE-04, RETRIEVE-05)
+- [ ] 05-05-PLAN.md — Unskip and implement all 12 test stubs; full suite green (RETRIEVE-04, RETRIEVE-05)
 
 **Done when:**
 - "What was my average HbA1c last year?" returns a SQL-computed answer
@@ -224,3 +226,4 @@ Phase 8 (Security) ── independent, can run in parallel with Phase 4-6
 *Phase 2 plans created: 2026-04-05*
 *Phase 3 plans created: 2026-04-06*
 *Phase 4 plans created: 2026-04-06*
+*Phase 5 plans created: 2026-04-08*
