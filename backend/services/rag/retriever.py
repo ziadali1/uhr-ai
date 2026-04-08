@@ -15,44 +15,48 @@ from services.rag.router import (
     execute_sql_steps,
     format_sql_block,
     assemble_chat_block,
+    build_patient_summary,
 )
 
-SYSTEM_PROMPT = """Você é um assistente médico de suporte ao paciente.
-Seu papel é responder perguntas com base EXCLUSIVAMENTE nas informações fornecidas abaixo.
+SYSTEM_PROMPT = """Você é um assistente clínico de suporte ao paciente. Analisa o histórico médico completo e responde com raciocínio clínico, não apenas com lookup literal de dados.
+
 Regras obrigatórias:
-- Nunca invente informações que não estejam nos dados fornecidos.
-- Sempre cite a fonte (nome do documento) ao mencionar uma informação de documento.
-- Se a informação não estiver disponível, diga claramente que não encontrou.
-- Nunca emita diagnósticos. Se perguntado, lembre que suas respostas são informativas e não substituem avaliação médica.
-- Responda sempre em português do Brasil.
-- Os dados estruturados do paciente (seção === DADOS ESTRUTURADOS DO PACIENTE ===) representam fatos verificados extraídos dos registros médicos. Trate-os como fonte primária de verdade.
-- Os documentos de suporte (seção === DOCUMENTOS DE SUPORTE ===) fornecem contexto narrativo e clínico adicional. Use-os como evidência de apoio.
-- Ao responder, sintetize as informações de ambas as seções quando disponíveis."""
+- Use o PERFIL CLÍNICO DO PACIENTE como âncora — ele contém os dados estruturados verificados.
+- Interprete valores em contexto clínico: mencione valores de referência quando relevante, sinalize alterações, identifique padrões.
+- Sintetize informações de múltiplas fontes (perfil + exames detalhados + documentos narrativos) numa resposta coerente.
+- Se o paciente pergunta sobre algo que não está nos dados, diga claramente o que não foi encontrado E o que está disponível que pode ser relevante.
+- Nunca invente dados clínicos ou valores laboratoriais.
+- Nunca emita diagnósticos definitivos — oriente sempre a confirmar com o médico responsável.
+- Cite a fonte ao mencionar informações de documentos narrativos.
+- Responda sempre em português do Brasil."""
 
 
 def build_context_prompt(question: str, user_id: str) -> tuple[str, list[str]]:
     """
-    Route query, fetch SQL + search results, assemble structured context for Claude.
+    Build clinical context for the LLM: compact patient summary (always) +
+    targeted SQL results + narrative search results (intent-driven).
 
     Signature preserved: (question: str, user_id: str) -> (system_prompt_with_context, sources).
     api/chat.py requires no changes.
     """
-    # Step 1: classify intent, extract entities, resolve temporal references (RETRIEVE-04)
-    routing = route_query(question, user_id)
+    # Step 1: build compact patient summary — anchors both routing and the final context
+    patient_summary = build_patient_summary(user_id)
 
-    # Step 2: execute SQL steps for structured patient data (sql_only or mixed)
+    # Step 2: classify intent using the summary as context (router uses exact names from profile)
+    routing = route_query(question, user_id, patient_summary=patient_summary)
+
+    # Step 3: targeted SQL for structured data (sql_only or mixed)
     sql_block = ""
     if routing.intent in ("sql_only", "mixed") and routing.sql_steps:
         sql_results = execute_sql_steps(routing.sql_steps, user_id)
         sql_block = format_sql_block(sql_results)
 
-    # Step 3: hybrid search for narrative queries (search_only or mixed)
-    # Reduce top_k 3->2 when SQL block has data (D-14 context budget)
+    # Step 4: hybrid search for narrative documents (search_only or mixed)
+    # Reduce top_k 3->2 when structured data is already present (context budget)
     search_results: list[SearchResult] = []
     sources: list[str] = []
     if routing.intent in ("search_only", "mixed"):
-        top_k = 2 if sql_block else 3
-        # Use first search_query if available, else fall back to original question
+        top_k = 2 if (patient_summary or sql_block) else 3
         search_query = routing.search_queries[0] if routing.search_queries else question
         query_vector = generate_embedding(search_query)
         search_results = search(search_query, user_id, top_k=top_k, query_vector=query_vector)
@@ -60,12 +64,14 @@ def build_context_prompt(question: str, user_id: str) -> tuple[str, list[str]]:
             if r.source_name not in sources:
                 sources.append(r.source_name)
 
-    # sql_only: no search — sources come from SQL table labels
     if routing.intent == "sql_only" and not sources:
         sources = ["dados estruturados do paciente"]
 
-    # Step 4: assemble context sections (D-12/D-13 ordering: SQL first, docs second)
+    # Step 5: assemble context — summary always first, then targeted SQL, then narrative docs
     context_sections: list[str] = []
+
+    if patient_summary:
+        context_sections.append(patient_summary)
 
     if sql_block:
         context_sections.append(sql_block)
@@ -77,7 +83,7 @@ def build_context_prompt(question: str, user_id: str) -> tuple[str, list[str]]:
                 doc_id=r.doc_id,
                 source_name=r.source_name,
                 excerpt=r.excerpt,
-                collection_date=None,  # not available on SearchResult; assembler uses "data desconhecida"
+                collection_date=None,
             )
             doc_parts.append(block)
         docs_section = (

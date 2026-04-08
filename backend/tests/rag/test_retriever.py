@@ -8,6 +8,9 @@ from unittest.mock import patch, MagicMock
 from services.rag.retriever import build_context_prompt
 from services.rag.router import RoutingResult
 
+_EMPTY_SUMMARY = ""
+_SAMPLE_SUMMARY = "=== PERFIL CLÍNICO DO PACIENTE ===\nExames laboratoriais:\n  hemácias / campo: 3 (2024-01-01)\n=== FIM DO PERFIL ==="
+
 
 def _make_routing(intent="search_only", search_queries=None, sql_steps=None):
     return RoutingResult(
@@ -20,7 +23,8 @@ def _make_routing(intent="search_only", search_queries=None, sql_steps=None):
 def test_build_context_prompt_calls_generate_embedding():
     """Mock route_query to return search_only; assert generate_embedding called with the search query."""
     routing = _make_routing(intent="search_only", search_queries=["HbA1c results"])
-    with patch("services.rag.retriever.route_query", return_value=routing), \
+    with patch("services.rag.retriever.build_patient_summary", return_value=_EMPTY_SUMMARY), \
+         patch("services.rag.retriever.route_query", return_value=routing), \
          patch("services.rag.retriever.generate_embedding") as mock_embed, \
          patch("services.rag.retriever.search", return_value=[]) as mock_search:
         mock_embed.return_value = [0.1] * 1536
@@ -32,7 +36,8 @@ def test_build_context_prompt_passes_vector_to_search():
     """Assert search is called with query_vector from generate_embedding."""
     vec = [0.1] * 1536
     routing = _make_routing(intent="search_only", search_queries=["HbA1c"])
-    with patch("services.rag.retriever.route_query", return_value=routing), \
+    with patch("services.rag.retriever.build_patient_summary", return_value=_EMPTY_SUMMARY), \
+         patch("services.rag.retriever.route_query", return_value=routing), \
          patch("services.rag.retriever.generate_embedding", return_value=vec), \
          patch("services.rag.retriever.search", return_value=[]) as mock_search:
         build_context_prompt("HbA1c", "u1")
@@ -43,20 +48,18 @@ def test_build_context_prompt_passes_vector_to_search():
 def test_retriever_degrades_when_embedding_fails():
     """When generate_embedding returns None, search should be called with query_vector=None."""
     routing = _make_routing(intent="search_only", search_queries=["test"])
-    with patch("services.rag.retriever.route_query", return_value=routing), \
+    with patch("services.rag.retriever.build_patient_summary", return_value=_EMPTY_SUMMARY), \
+         patch("services.rag.retriever.route_query", return_value=routing), \
          patch("services.rag.retriever.generate_embedding", return_value=None), \
          patch("services.rag.retriever.search", return_value=[]) as mock_search:
         build_context_prompt("test", "u1")
         call_kwargs = mock_search.call_args
-        # search should be called with query_vector=None
         assert "query_vector" in str(call_kwargs)
 
 
 def test_context_includes_sql_section():
     """Verifies build_context_prompt returns context containing SQL structured block
     when route_query returns sql_only intent."""
-    from services.rag.router import RoutingResult
-
     routing = RoutingResult(
         intent="sql_only",
         sql_steps=["medications:active"],
@@ -76,6 +79,7 @@ def test_context_includes_sql_section():
     )
 
     with patch.dict(os.environ, {"USE_MOCK_AZURE": "false"}), \
+         patch("services.rag.retriever.build_patient_summary", return_value=_SAMPLE_SUMMARY), \
          patch("services.rag.retriever.route_query", return_value=routing), \
          patch("services.rag.retriever.execute_sql_steps", return_value=sql_results), \
          patch("services.rag.retriever.format_sql_block", return_value=sql_block_text), \
@@ -85,4 +89,30 @@ def test_context_includes_sql_section():
 
     assert "DADOS ESTRUTURADOS DO PACIENTE" in system_prompt
     assert "Metformina" in system_prompt
+    assert "PERFIL CLÍNICO DO PACIENTE" in system_prompt
     assert isinstance(sources, list)
+
+
+def test_patient_summary_always_included_in_context():
+    """Patient summary appears in the system prompt even when SQL and search return nothing."""
+    routing = _make_routing(intent="search_only", search_queries=["test"])
+    with patch("services.rag.retriever.build_patient_summary", return_value=_SAMPLE_SUMMARY), \
+         patch("services.rag.retriever.route_query", return_value=routing), \
+         patch("services.rag.retriever.generate_embedding", return_value=None), \
+         patch("services.rag.retriever.search", return_value=[]):
+        system_prompt, _ = build_context_prompt("test", "u1")
+
+    assert "PERFIL CLÍNICO DO PACIENTE" in system_prompt
+    assert "hemácias / campo" in system_prompt
+
+
+def test_route_query_receives_patient_summary():
+    """route_query is called with the patient_summary kwarg so it uses exact analyte names."""
+    routing = _make_routing(intent="search_only")
+    with patch("services.rag.retriever.build_patient_summary", return_value=_SAMPLE_SUMMARY) as mock_summary, \
+         patch("services.rag.retriever.route_query", return_value=routing) as mock_route, \
+         patch("services.rag.retriever.generate_embedding", return_value=None), \
+         patch("services.rag.retriever.search", return_value=[]):
+        build_context_prompt("qual meu exame?", "u1")
+
+    mock_route.assert_called_once_with("qual meu exame?", "u1", patient_summary=_SAMPLE_SUMMARY)
