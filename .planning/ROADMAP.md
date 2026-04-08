@@ -131,10 +131,10 @@ Plans:
 
 **Requirements:** TIMELINE-01, TIMELINE-02, TIMELINE-03
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
-- [ ] 06-01-PLAN.md — Wave 0 test stubs + patient_query.py service layer (TIMELINE-01, TIMELINE-02)
+- [x] 06-01-PLAN.md — Wave 0 test stubs + patient_query.py service layer (TIMELINE-01, TIMELINE-02)
 - [ ] 06-02-PLAN.md — Timeline/summary API routers + main.py registration + emergency.py refactor (TIMELINE-01, TIMELINE-02)
 - [ ] 06-03-PLAN.md — Frontend PatientStructuredData component + dashboard integration (TIMELINE-03)
 

@@ -32,8 +32,8 @@
 
 ### Patient Timeline
 
-- [ ] **TIMELINE-01**: API exposes patient observation timeline (lab values by analyte over time, filterable by date range)
-- [ ] **TIMELINE-02**: API exposes active conditions, current medications, and allergies as patient-level aggregates (not per-document)
+- [x] **TIMELINE-01**: API exposes patient observation timeline (lab values by analyte over time, filterable by date range)
+- [x] **TIMELINE-02**: API exposes active conditions, current medications, and allergies as patient-level aggregates (not per-document)
 - [ ] **TIMELINE-03**: Frontend dashboard displays longitudinal lab trends and active clinical status
 
 ### Clinical Reasoning
@@ -101,8 +101,8 @@
 | RETRIEVE-03 | Phase 4 | Complete |
 | RETRIEVE-04 | Phase 5 | Complete |
 | RETRIEVE-05 | Phase 5 | Complete |
-| TIMELINE-01 | Phase 6 | Pending |
-| TIMELINE-02 | Phase 6 | Pending |
+| TIMELINE-01 | Phase 6 | Complete |
+| TIMELINE-02 | Phase 6 | Complete |
 | TIMELINE-03 | Phase 6 | Pending |
 | REASON-01 | Phase 7 | Pending |
 | REASON-02 | Phase 7 | Pending |

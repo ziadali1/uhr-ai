@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: Not started
-status: Ready to plan
-stopped_at: Completed 05-05 — Wave 3 test implementation
-last_updated: "2026-04-08T10:56:12.433Z"
+current_plan: 1
+status: Executing Phase 06
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-04-08T19:11:17.754Z"
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 22
-  completed_plans: 22
+  total_plans: 25
+  completed_plans: 23
 ---
 
 # Project State
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** A patient's complete medical history — reliably extracted, reliably retrievable, and intelligently reasoned over.
-**Current focus:** Phase 05 — query-routing-and-context-assembly
+**Current focus:** Phase 06 — patient-timeline-api-and-dashboard
 
 ## Current Phase
 
 **Phase 3: Migration and Backfill** — In progress (2/3 plans done)
 
-Current Plan: Not started
+Current Plan: 1
 Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and tested)
 
 ## Milestone
@@ -94,6 +94,8 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 05-04]: assemble_chat_block called per search result with collection_date=None (SearchResult lacks date; assembler handles gracefully)
 - [Phase 05]: patch _use_mock_cache to None before each mock-mode test so _use_mock() re-reads env var (cache invalidation)
 - [Phase 05]: test_sql_user_isolation uses select_mock.eq.call_args_list to inspect first .eq() call in chain — method_calls on mock_client only shows top-level calls
+- [Phase 06-01]: value_num and ref_low/ref_high are NOT DB columns — derived at query-time from value_str and reference_range in _enrich_observation()
+- [Phase 06-01]: date_from/date_to sliced to [:10] chars before Supabase .gte/.lte call per Pitfall 4
 
 ## Performance Metrics
 
@@ -122,10 +124,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 05 P03 | 4min | 1 tasks | 1 files |
 | Phase 05 P04 | 8min | 1 tasks | 2 files |
 | Phase 05 P05 | 5min | 2 tasks | 2 files |
+| Phase 06 P01 | 2min | 2 tasks | 4 files |
 
 ## Last Session
 
-**Stopped at:** Completed 05-05 — Wave 3 test implementation
+**Stopped at:** Completed 06-01-PLAN.md
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context
