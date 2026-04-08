@@ -16,6 +16,13 @@ from services.azure.llm import generate_json
 from services.azure.search import search, SearchResult
 from services.azure.embeddings import generate_embedding
 from services.supabase_store import _get_client
+from models.document import (
+    StructuredResult,
+    StructuredLab,
+    ImagingReport,
+    ClinicalNote,
+    MedicationDocument,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -309,3 +316,104 @@ def format_sql_block(sql_results: list[dict]) -> str:
     if len(lines) <= 2:  # only header and footer — no actual data
         return ""
     return "\n".join(lines)
+
+
+# ── Chat context assembler (RETRIEVE-05 / D-11) ───────────────────────────────
+
+
+def _fetch_structured_result(doc_id: str) -> StructuredResult | None:
+    """Fetch structured_result from documents table by doc_id. Soft-fail: returns None on any error."""
+    try:
+        client = _get_client()
+        resp = client.table("documents").select("structured_result").eq("id", doc_id).single().execute()
+        if resp.data is None or not resp.data.get("structured_result"):
+            return None
+        sr_data = resp.data["structured_result"]
+        return StructuredResult(**sr_data)
+    except Exception as e:
+        logger.warning("_fetch_structured_result failed for doc_id=%s: %s", doc_id, e)
+        return None
+
+
+def assemble_chat_block(
+    doc_id: str,
+    source_name: str,
+    excerpt: str,
+    collection_date: str | None = None,
+) -> str:
+    """Assemble a compact clinical block for Claude prompt. Max ~1200 chars (~300 tokens).
+    Soft-fail: falls back to raw excerpt when structured_result unavailable."""
+    sr = _fetch_structured_result(doc_id)
+    family = sr.document_family if sr else "unknown"
+    date_str = collection_date or "data desconhecida"
+    header = f"[Fonte: {source_name} | {family} | {date_str}]"
+
+    if sr is None:
+        return f"{header}\n{excerpt[:400]}"
+
+    parts = [header]
+
+    try:
+        if sr.document_family == "structured_lab":
+            lab = StructuredLab(**sr.structured_data)
+            if lab.summary:
+                parts.append(f"Summary: {lab.summary[:200]}")
+            if lab.findings:
+                finding_strs = []
+                for f in lab.findings[:10]:
+                    s = f"{f.name}: {f.value}"
+                    if f.unit:
+                        s += f" {f.unit}"
+                    if f.flag:
+                        s += f" [{f.flag}]"
+                    finding_strs.append(s)
+                parts.append(f"Findings: {' | '.join(finding_strs)}")
+            entities = lab.entities_for_memory or sr.entities_for_memory
+            if entities:
+                parts.append(f"Entities: {', '.join(e for e in entities if e)[:150]}")
+
+        elif sr.document_family == "imaging_narrative":
+            report = ImagingReport(**sr.structured_data)
+            if report.summary:
+                parts.append(f"Summary: {report.summary[:200]}")
+            text = report.impression or report.findings
+            if text:
+                parts.append(f"Findings: {text[:300]}")
+            entities = report.entities_for_memory or sr.entities_for_memory
+            if entities:
+                parts.append(f"Entities: {', '.join(e for e in entities if e)[:150]}")
+
+        elif sr.document_family == "clinical_narrative":
+            note = ClinicalNote(**sr.structured_data)
+            if note.summary:
+                parts.append(f"Summary: {note.summary[:200]}")
+            if note.diagnoses:
+                parts.append(f"Findings: {', '.join(d for d in note.diagnoses if d)[:300]}")
+            entities = note.entities_for_memory or sr.entities_for_memory
+            if entities:
+                parts.append(f"Entities: {', '.join(e for e in entities if e)[:150]}")
+
+        elif sr.document_family == "medication_document":
+            med_doc = MedicationDocument(**sr.structured_data)
+            if med_doc.summary:
+                parts.append(f"Summary: {med_doc.summary[:200]}")
+            if med_doc.medications:
+                med_strs = [
+                    m.name + (f" {m.dose}" if m.dose else "") + (f" - {m.frequency}" if m.frequency else "")
+                    for m in med_doc.medications[:10]
+                ]
+                parts.append(f"Findings: {' | '.join(med_strs)}")
+            entities = med_doc.entities_for_memory or sr.entities_for_memory
+            if entities:
+                parts.append(f"Entities: {', '.join(e for e in entities if e)[:150]}")
+
+        else:
+            # Unknown family — fall back to excerpt
+            parts.append(excerpt[:400])
+
+    except Exception as e:
+        logger.warning("assemble_chat_block dispatch failed for doc_id=%s family=%s: %s", doc_id, sr.document_family, e)
+        parts.append(excerpt[:400])
+
+    block = "\n".join(parts)
+    return block[:1200]
