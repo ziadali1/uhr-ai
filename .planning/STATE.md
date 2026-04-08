@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: Not started
-status: Ready to plan
-stopped_at: Completed 04-06 — Re-index documents script
-last_updated: "2026-04-07T21:44:15.596Z"
+current_plan: 1
+status: Executing Phase 05
+stopped_at: Completed 05-01 — Wave 0 test stubs for query routing and context assembly
+last_updated: "2026-04-08T10:39:36.907Z"
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 17
-  completed_plans: 17
+  total_plans: 22
+  completed_plans: 18
 ---
 
 # Project State
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** A patient's complete medical history — reliably extracted, reliably retrievable, and intelligently reasoned over.
-**Current focus:** Phase 04 — hybrid-search-index
+**Current focus:** Phase 05 — query-routing-and-context-assembly
 
 ## Current Phase
 
 **Phase 3: Migration and Backfill** — In progress (2/3 plans done)
 
-Current Plan: Not started
+Current Plan: 1
 Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and tested)
 
 ## Milestone
@@ -85,6 +85,7 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 - [Phase 04-04]: collection_date extracted from structured_data dict, not top-level StructuredResult field — matches existing data shape
 - [Phase 04-06]: Script truncates search_index via delete().neq('id','') — Supabase REST lacks TRUNCATE
 - [Phase 04-06]: content_vector passed as-is (None) to index_document which already guards against null vector serialization
+- [Phase 05-01]: import pytest added to test_retriever.py (was missing before adding skip decorator)
 
 ## Performance Metrics
 
@@ -108,10 +109,11 @@ Last completed: 03-01 + 03-02 (Wave 1 — both migration scripts built and teste
 | Phase 04 P05 | 68s | 1 tasks | 2 files |
 | Phase 04 P04 | 2min | 2 tasks | 3 files |
 | Phase 04 P06 | 3min | 1 tasks | 1 files |
+| Phase 05 P01 | 5min | 2 tasks | 2 files |
 
 ## Last Session
 
-**Stopped at:** Completed 04-06 — Re-index documents script
+**Stopped at:** Completed 05-01 — Wave 0 test stubs for query routing and context assembly
 **Timestamp:** 2026-04-06T19:00:00Z
 
 ## Key Context
