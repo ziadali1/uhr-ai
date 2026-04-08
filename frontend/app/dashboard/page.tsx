@@ -1,8 +1,9 @@
 import React from "react";
 import Link from "next/link";
-import { Upload, MessageSquare, QrCode, Brain, Activity } from "lucide-react";
+import { Upload, MessageSquare, Brain, Activity } from "lucide-react";
 import { PatientSummary } from "@/components/dashboard/PatientSummary";
 import { PatientStructuredData } from "@/components/dashboard/PatientStructuredData";
+import { EmergencyLink } from "@/components/dashboard/EmergencyLink";
 
 const quickLinks: { icon: React.ElementType; title: string; description: string; href: string; color: string; disabled?: boolean; badge?: string }[] = [
   {
@@ -18,13 +19,6 @@ const quickLinks: { icon: React.ElementType; title: string; description: string;
     description: "Perguntas sobre o histórico.",
     href: "/chat",
     color: "text-green-600 bg-green-50",
-  },
-  {
-    icon: QrCode,
-    title: "Emergência",
-    description: "Relatório crítico via QR Code.",
-    href: "/emergency?userId=local-dev-user-001",
-    color: "text-red-600 bg-red-50",
   },
 ];
 
@@ -60,6 +54,7 @@ export default function DashboardPage() {
               )}
             </Link>
           ))}
+          <EmergencyLink />
         </div>
       </div>
 
