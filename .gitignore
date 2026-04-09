@@ -1,18 +1,36 @@
 # Backend
 backend/.env
+backend/.env.*
 backend/__pycache__/
 backend/**/__pycache__/
 backend/*.pyc
-backend/.pytest_cache/
+backend/**/*.pyc
+**/.pytest_cache/
 backend/venv/
 backend/.venv/
+backend/.coverage
+backend/htmlcov/
 
 # Frontend
 frontend/.env.local
+frontend/.env.*
 frontend/node_modules/
 frontend/.next/
 frontend/out/
+frontend/.turbo/
+
+# Supabase
+supabase/.env
+supabase/.branches/
+
+# Claude Code (local — worktrees e settings não vão ao repo)
+.claude/
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/settings.json
+.idea/
