@@ -57,7 +57,7 @@ Pacientes com históricos médicos complexos enfrentam barreiras diárias:
      │              │               │
 ┌────▼──────────────▼───────────────▼──────────────────┐
 │                  Azure AI Search                      │
-│           (banco vetorial — RAG por usuário)          │
+│           (busca por keyword — RAG por usuário)       │
 └───────────────────────────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────┐
@@ -82,26 +82,32 @@ Pacientes com históricos médicos complexos enfrentam barreiras diárias:
 ### Azure Services
 - **Azure Document Intelligence** — OCR de PDFs e imagens de laudos
 - **Azure Text Analytics for Health** — Extração de entidades médicas (diagnósticos, medicamentos, sintomas, procedimentos)
-- **Azure AI Search** — Banco vetorial com namespace por usuário (RAG)
-- **Azure AI Foundry** — Orquestração do LLM (Claude / GPT-4)
+- **Azure AI Search** — Busca full-text com namespace por usuário (RAG)
+- **Azure AI Foundry** — Orquestração do LLM (Claude)
 - **Azure Blob Storage** — Armazenamento seguro de documentos
 
 ### Auth & Dados
-- **Supabase Auth** — Autenticação simplificada
+- **Supabase Auth** — Autenticação com JWT
 - **PostgreSQL (Supabase)** — Metadados e perfis de usuário
 
 ---
 
-## 🔒 Anonimização Automática
+## 🔬 Pipeline de Processamento de Documentos
 
-Todo documento passa por um pipeline de anonimização antes de ser armazenado:
+Todo documento passa por um pipeline híbrido de 3 camadas:
 
 ```
-Upload → OCR (Document Intelligence)
-       → Text Analytics detecta: nomes, CPFs, CRMs, endereços
-       → Substitui por tokens: [PACIENTE], [MÉDICO], [DOCUMENTO]
-       → Salva versão anonimizada no Blob Storage
-       → Arquivo original descartado
+Upload → OCR (Document Intelligence) → texto bruto
+       → Classificador (regex + LLM fallback)
+         → família: structured_lab | imaging_narrative |
+                    clinical_narrative | medication_document
+       → Limpeza estrutural
+         → separa metadados administrativos (CPF, CRM, endereço)
+         → preserva apenas o texto clínico
+       → Extração estruturada via LLM (por família)
+         → achados, flags, resumo clínico, entidades para memória
+       → Arquivo original salvo no Blob Storage (acessível na UI)
+       → Indexação no Azure AI Search (RAG por usuário)
 ```
 
 ---
@@ -163,43 +169,63 @@ Cada usuário tem seu **namespace isolado** no Azure AI Search — privado, segu
 
 ## 📅 Plano de Desenvolvimento
 
-> 💡 **Autenticação real (Supabase) é implementada apenas na Fase 5.**  
-> Durante o desenvolvimento, um usuário mock local é utilizado para agilizar os testes.
-
 ### ✅ Fase 1 — Ambiente e Upload
-- [ ] Setup do ambiente local (Python, Node.js, Git)
-- [ ] Criar repositório no GitHub
-- [ ] Setup do projeto (Next.js + FastAPI)
-- [ ] Usuário mock local para desenvolvimento (`utils/auth.py`)
-- [ ] Upload de documentos (PDF, imagem)
-- [ ] OCR com Azure Document Intelligence
-- [ ] Pipeline de anonimização automática
-- [ ] Armazenamento no Azure Blob Storage
+- [x] Setup do ambiente local (Python, Node.js, Git)
+- [x] Criar repositório no GitHub
+- [x] Setup do projeto (Next.js + Azure Functions / FastAPI)
+- [x] Upload de documentos (PDF, imagem)
+- [x] OCR com Azure Document Intelligence
+- [x] Armazenamento no Azure Blob Storage (arquivo original + texto OCR)
 
-### 🔄 Fase 2 — RAG e Agente
-- [ ] Indexação vetorial no Azure AI Search
-- [ ] Namespace isolado por usuário
-- [ ] Integração com Azure AI Foundry (LLM)
-- [ ] Chat funcional com citação de fontes do histórico
+### ✅ Fase 2 — RAG e Agente IA
+- [x] Indexação no Azure AI Search (keyword/BM25, namespace por usuário)
+- [x] Namespace isolado por usuário
+- [x] Integração com LLM (Claude via Azure AI Foundry)
+- [x] Chat funcional com citação de fontes do histórico
 
-### 🔄 Fase 3 — Análise e Direcionamento
-- [ ] Extração de entidades com Text Analytics for Health
-- [ ] Geração de resumo do caso pelo agente
+### ✅ Fase 2b — Pipeline Híbrido de Documentos *(novo)*
+- [x] Classificador de família documental (structured_lab, imaging_narrative, clinical_narrative, medication_document)
+- [x] Fallback LLM no classificador para documentos ambíguos
+- [x] Limpeza estrutural — separação de metadados administrativos do texto clínico
+- [x] Extração estruturada via LLM por família (achados, flags, resumo clínico)
+- [x] Entidades clínicas derivadas do resultado estruturado
+
+### ✅ Fase 2c — Centralização e Visualização de Documentos *(novo)*
+- [x] Label de tipo documental na lista (laboratório, imagem, nota clínica, prescrição)
+- [x] Armazenamento e visualização do arquivo original (PDF/imagem) na UI
+- [x] Visualização estruturada por família (tabela de achados, laudo de imagem, nota clínica, prescrição)
+- [x] Resumo clínico automático exibido na lista de documentos
+
+### ✅ Fase 2d — Perfil de Saúde Manual (/saude) *(novo)*
+- [x] Entrada manual: medicamentos em uso, queixas recentes, alergias
+- [x] CRUD completo com persistência no Supabase
+- [x] Sincronização automática com o RAG após cada alteração
+
+### ⚠️ Fase 3 — Análise e Direcionamento *(parcial)*
+- [x] Resumo clínico automático por documento (via extrator LLM)
+- [x] Agregação de entidades e sugestão de especialidades médicas (mock)
+- [ ] Análise consolidada do caso via LLM em produção (`_llm_analysis` não implementado)
 - [ ] Hipóteses diagnósticas com disclaimer obrigatório
-- [ ] Sugestão de especialidades médicas
 
-### 🔄 Fase 4 — Modo Emergência
-- [ ] Página pública acessível sem login (QR Code)
-- [ ] Alertas automáticos de interações medicamentosas
-- [ ] Cartão imprimível em PDF
-- [ ] Link compartilhável com familiares
+### ✅ Fase 4 — Modo Emergência
+- [x] Página pública acessível sem login (`/emergency?userId=...`)
+- [x] QR Code gerado dinamicamente (PNG)
+- [x] Cartão de emergência imprimível em PDF (A5)
+- [x] Exibe: tipo sanguíneo, alergias (com severidade), medicamentos, condições ativas
 
-### 🔄 Fase 5 — Autenticação e Polimento
-- [ ] Integração real com Supabase Auth
-- [ ] Substituição do mock user por autenticação real
-- [ ] Deploy completo no Azure
-- [ ] Demo com dados anonimizados reais
+### ✅ Fase 5 — Autenticação e Deploy
+- [x] Integração real com Supabase Auth (JWT)
+- [x] Deploy backend no Azure Functions
+- [x] Deploy frontend no Azure Static Web Apps
 - [ ] Vídeo de demonstração para portfólio
+
+### ❌ Pendente / Backlog
+- Análise consolidada via LLM em produção (Fase 3)
+- Exclusão de documentos do histórico
+- Busca semântica com embeddings (atual: keyword BM25)
+- Comparação temporal de exames (ex: evolução de TSH ao longo do tempo)
+- Correção de bug: `chat.py` sem tratamento de exceções (erro 500 em produção)
+- Correção de bug: `extractor.py` sem logging de falhas silenciosas
 
 ---
 
@@ -224,8 +250,8 @@ Cada usuário tem seu **namespace isolado** no Azure AI Search — privado, segu
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/healthai.git
-cd healthai
+git clone https://github.com/ziadali1/uhr-ai.git
+cd uhr-ai
 
 # Backend
 cd backend
@@ -245,32 +271,30 @@ npm run dev
 ## 📁 Estrutura do Projeto
 
 ```
-healthai/
+uhr-ai/
 ├── frontend/                  # Next.js App
 │   ├── app/
 │   │   ├── dashboard/         # Painel do paciente
-│   │   ├── emergency/         # Página pública de emergência
+│   │   ├── emergency/         # Página pública de emergência (sem login)
 │   │   ├── chat/              # Interface do agente IA
+│   │   ├── saude/             # Perfil de saúde manual
 │   │   └── upload/            # Upload de documentos
 │   └── components/
 │       ├── ui/                # shadcn/ui components
-│       ├── emergency/         # Componentes do modo emergência
 │       ├── chat/              # Componentes do chat
-│       └── upload/            # Componentes de upload
+│       ├── health/            # Componentes do perfil de saúde
+│       └── upload/            # Componentes de upload e visualização
 │
 ├── backend/                   # Azure Functions (Python)
 │   ├── api/                   # Endpoints REST
 │   ├── services/
 │   │   ├── azure/             # Integrações Azure
-│   │   ├── rag/               # Pipeline RAG
-│   │   └── anonymizer/        # Anonimização de documentos
+│   │   ├── pipeline/          # Classificador, limpeza e extrator
+│   │   └── rag/               # Pipeline RAG
 │   ├── models/                # Schemas Pydantic
 │   └── utils/                 # Utilitários
 │
 └── docs/                      # Documentação adicional
-    ├── architecture.md
-    ├── azure-setup.md
-    └── demo-data.md
 ```
 
 ---
